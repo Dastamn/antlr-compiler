@@ -1,0 +1,13 @@
+compil Test() {
+floatcompil y;
+
+start
+y = 2;
+if (2 < 1) then
+y = y + 1;
+else
+y = y - 1;
+endif;
+printcompil(y);
+printcompil("Hell\\"o world!");
+}
