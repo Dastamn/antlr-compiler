@@ -37,8 +37,7 @@ public class TinyListener extends gBaseListener {
         String id = ctx.ID().getText();
         STElement stElement = symbolTable.get(id);
         if (stElement != null) {
-            Number number = values.pop();
-            stElement.setValue(stElement.isFloatCompil() ? number.getValue() : (int) number.getValue());
+            stElement.setNumber(values.pop());
         } else {
             Logger.error("Identifier \"" + id + "\" not declared.");
         }
@@ -73,8 +72,7 @@ public class TinyListener extends gBaseListener {
 
     @Override
     public void exitNumber(gParser.NumberContext ctx) {
-        values.push(new Number(Float.parseFloat(ctx.getText()),
-                (ctx.getText().contains(".") || ctx.getText().contains(",") ? "float" : "int") + "compil"));
+        values.push(new Number(Float.parseFloat(ctx.getText())));
     }
 
     @Override
@@ -82,8 +80,8 @@ public class TinyListener extends gBaseListener {
         String id = ctx.getText();
         STElement stElement = symbolTable.get(id);
         if (stElement != null) {
-            if (stElement.getValue() != null) {
-                values.push(new Number(stElement.getValue(), stElement.getType()));
+            if (stElement.getNumber() != null) {
+                values.push(stElement.getNumber());
             } else {
                 Logger.error("Identifier \"" + id + "\" not initialised.");
             }

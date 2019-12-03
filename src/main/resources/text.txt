@@ -1,13 +1,13 @@
-compil Test() {
+compil Tiny_Language_SII() {
 floatcompil y;
+intcompil x;
 
 start
-y = 2;
-if (2 < 1) then
-y = y + 1;
+x = 2;
+if (x > 1) then
+    x = x + 1;
 else
-y = y - 1;
+    x = x - 1;
 endif;
-printcompil(y);
-printcompil("Hell\\"o world!");
+
 }

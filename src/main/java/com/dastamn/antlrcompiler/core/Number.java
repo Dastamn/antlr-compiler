@@ -5,49 +5,44 @@ import com.dastamn.antlrcompiler.util.Logger;
 public class Number {
 
     private float value;
-    private String type;
 
-    public Number(float value, String type) {
+    public Number(float value) {
         this.value = value;
-        this.type = type;
+    }
+
+     float asFloat() {
+        return value;
+    }
+
+     int asInt() {
+        return (int) value;
     }
 
     public float getValue() {
         return value;
     }
 
-    public String getType() {
-        return type;
+     Number castToInt() {
+        this.value = (int) value;
+        return this;
     }
 
     public Number plus(Number number) {
-        if (number.type.equals("floatcompil")) {
-            this.type = "floatcompil";
-        }
         this.value += number.value;
         return this;
     }
 
     public Number minus(Number number) {
-        if (number.type.equals("floatcompil")) {
-            this.type = "floatcompil";
-        }
         this.value -= number.value;
         return this;
     }
 
     public Number times(Number number) {
-        if (number.type.equals("floatcompil")) {
-            this.type = "floatcompil";
-        }
         this.value *= number.value;
         return this;
     }
 
     public Number div(Number number) {
-        if (number.type.equals("floatcompil")) {
-            this.type = "floatcompil";
-        }
         if (number.value == 0) {
             Logger.error("Can't divide by zero.");
         }
@@ -62,6 +57,6 @@ public class Number {
 
     @Override
     public String toString() {
-        return "{value: " + value + ", type: " + type + "}";
+        return String.valueOf(value);
     }
 }

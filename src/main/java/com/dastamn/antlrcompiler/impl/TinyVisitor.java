@@ -58,8 +58,7 @@ public class TinyVisitor extends gBaseVisitor {
 
     @Override
     public Number visitNumber(gParser.NumberContext ctx) {
-        return new Number(Float.parseFloat(ctx.getText()),
-                (ctx.getText().contains(".") || ctx.getText().contains(",") ? "float" : "int") + "compil");
+        return new Number(Float.parseFloat(ctx.getText()));
     }
 
     @Override
@@ -67,8 +66,8 @@ public class TinyVisitor extends gBaseVisitor {
         String id = ctx.getText();
         STElement stElement = symbolTable.get(id);
         if (stElement != null) {
-            if (stElement.getValue() != null) {
-                return new Number(stElement.getValue(), stElement.getType());
+            if (stElement.getNumber() != null) {
+                return stElement.getNumber();
             }
             Logger.error("Identifier \"" + id + "\" not initialised.");
         } else {
@@ -90,7 +89,7 @@ public class TinyVisitor extends gBaseVisitor {
         String id = ctx.ID().getText();
         STElement stElement = symbolTable.get(id);
         if (stElement != null) {
-            stElement.setValue(stElement.isFloatCompil() ? res.getValue() : (int) res.getValue());
+            stElement.setNumber(res);
         } else {
             Logger.error("Identifier \"" + id + "\" not declared.");
         }
@@ -122,8 +121,7 @@ public class TinyVisitor extends gBaseVisitor {
             Arrays.stream(ids).forEach(id -> {
                 STElement stElement = symbolTable.get(id);
                 if (stElement != null) {
-                    System.out.println(stElement.isFloatCompil() ? stElement.getValue() :
-                            stElement.getValue().intValue());
+                    System.out.println(stElement.getValue());
                 } else {
                     Logger.error("Identifier \"" + id + "\" not declared.");
                 }

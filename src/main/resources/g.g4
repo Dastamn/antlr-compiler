@@ -38,10 +38,10 @@ fragment FLOAT: 'floatcompil';
 fragment LINE_COMMENT: '//'  (LINE_COMMENT | ~[\n\r])*;
 fragment MULTI_LINE_COMMENT: '/*' (LINE_COMMENT | .)*? '*/';
 
-PROG_NAME: UPPERCASE (ANYCASE* | DIGIT* | UNDERSCORE*);
+PROG_NAME: UPPERCASE (ANYCASE | DIGIT | UNDERSCORE)*;
 VAR_TYPE: INT | FLOAT;
 NUMBER: DIGIT+ | DIGIT* [.,] DIGIT+;
-ID: ANYCASE+ (DIGIT* | ANYCASE*);
+ID: ANYCASE (DIGIT | ANYCASE)*;
 STR: '"'(~[\n\r"]|'\\"')*'"';
 
 SEMI_COLON: ';';
