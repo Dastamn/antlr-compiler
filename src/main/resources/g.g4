@@ -24,7 +24,7 @@ elseBlock: 'else' instruction+ | 'else' ifStatement instruction+;
 evaluation: expression (GT | LT) expression;
 scan: 'scancompil' L_PAREN idList R_PAREN;
 print: 'printcompil' L_PAREN  (idList | STR) R_PAREN;
-str: STR EOF;
+
 /*lexer*/
 
 fragment DIGIT: [0-9];

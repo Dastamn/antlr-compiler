@@ -25,7 +25,7 @@ public class TinyListener extends gBaseListener {
         String[] ids = ctx.idList().getText().split(",");
         Arrays.stream(ids).forEach(id -> {
             if(!symbolTable.containsKey(id)) {
-                symbolTable.put(id, new STElement().setName(id).setType(type));
+                symbolTable.put(id, new STElement().setType(type));
             } else {
                 Logger.error("Identifier \"" + id + "\" already declared.");
             }

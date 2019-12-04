@@ -150,10 +150,4 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPrint(gParser.PrintContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link gParser#str}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitStr(gParser.StrContext ctx);
 }

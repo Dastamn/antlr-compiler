@@ -8,13 +8,16 @@ import com.dastamn.antlrcompiler.util.Logger;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Scanner;
 
 public class TinyVisitor extends gBaseVisitor {
 
     private final Map<String, STElement> symbolTable;
+    private final Scanner scanner;
 
     public TinyVisitor(Map<String, STElement> symbolTable) {
         this.symbolTable = symbolTable;
+        this.scanner = new Scanner(System.in);
     }
 
     @Override
@@ -23,7 +26,7 @@ public class TinyVisitor extends gBaseVisitor {
         String[] ids = (String[]) this.visit(ctx.idList());
         Arrays.stream(ids).forEach(id -> {
             if (!symbolTable.containsKey(id)) {
-                symbolTable.put(id, new STElement().setName(id).setType(type));
+                symbolTable.put(id, new STElement().setType(type));
             } else {
                 Logger.error("Identifier \"" + id + "\" already declared.");
             }
@@ -127,6 +130,28 @@ public class TinyVisitor extends gBaseVisitor {
                 }
             });
         }
-        return super.visitPrint(ctx);
+        return null;
+    }
+
+    @Override
+    public Object visitScan(gParser.ScanContext ctx) {
+        String[] ids = (String[]) this.visit(ctx.idList());
+        Arrays.stream(ids).forEach(id -> {
+            STElement stElement = symbolTable.get(id);
+            if (stElement == null) {
+                Logger.error("Identifier \"" + id + "\" not declared.");
+            } else {
+                String input = scanner.nextLine();
+                float value = 0;
+                try {
+                    value = Float.parseFloat(input);
+                } catch (NumberFormatException e) {
+                    Logger.error("Value of \"" + id + "\" must be of type \"" + stElement.getType() +
+                            "\", got: " + input);
+                }
+                stElement.setNumberValue(value);
+            }
+        });
+        return null;
     }
 }

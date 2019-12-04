@@ -2,13 +2,8 @@ package com.dastamn.antlrcompiler.core;
 
 public class STElement {
 
-    private String name;
     private Number number;
     private String type;
-
-    public String getName() {
-        return name;
-    }
 
     public Number getNumber() {
         return number;
@@ -19,16 +14,20 @@ public class STElement {
     }
 
     public Float getValue() {
-        return number != null ? type.equals("floatcompil") ? number.asFloat() : number.asInt() : null;
-    }
-
-    public STElement setName(String name) {
-        this.name = name;
-        return this;
+        return number != null ? type.equals("floatcompil") ? number.getValue() : number.asInt() : null;
     }
 
     public void setNumber(Number number) {
         this.number = type.equals("intcompil") ? number.castToInt() : number;
+    }
+
+    public void setNumberValue(float value) {
+        value = type.equals("intcompil") ? (int) value : value;
+        if(number == null) {
+            number = new Number(value);
+        } else {
+            number.setValue(value);
+        }
     }
 
     public STElement setType(String type) {
@@ -38,6 +37,6 @@ public class STElement {
 
     @Override
     public String toString() {
-        return "{name: " + name + ", type: " + type + ", value: " + number + "}";
+        return "{type: " + type + ", value: " + number + "}";
     }
 }

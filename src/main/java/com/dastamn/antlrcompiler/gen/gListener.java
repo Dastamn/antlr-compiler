@@ -243,14 +243,4 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPrint(gParser.PrintContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link gParser#str}.
-	 * @param ctx the parse tree
-	 */
-	void enterStr(gParser.StrContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link gParser#str}.
-	 * @param ctx the parse tree
-	 */
-	void exitStr(gParser.StrContext ctx);
 }

@@ -30,7 +30,7 @@ public class Compiler {
         ParseTree tree = parser.axiom();
         Map<String, STElement> symbolTable = new HashMap<>();
         userVisitor(symbolTable, tree);
-        Logger.info("symbol table: " + symbolTable);
+        Logger.stLog(symbolTable);
     }
 
     private static void useListener(Map<String, STElement> symbolTable, ParseTree tree) {

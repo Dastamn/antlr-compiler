@@ -275,18 +275,6 @@ public class gBaseListener implements gListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPrint(gParser.PrintContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterStr(gParser.StrContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitStr(gParser.StrContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

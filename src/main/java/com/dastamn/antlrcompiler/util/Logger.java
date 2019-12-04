@@ -1,13 +1,16 @@
 package com.dastamn.antlrcompiler.util;
 
-import java.util.logging.Level;
+import com.dastamn.antlrcompiler.core.STElement;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class Logger {
 
-    private final static java.util.logging.Logger logger;
+    private final static org.slf4j.Logger logger;
 
     static {
-        logger = java.util.logging.Logger.getLogger("Logger");
+        logger = LoggerFactory.getLogger("Logger");
     }
 
     public static void info(String msg) {
@@ -15,11 +18,20 @@ public class Logger {
     }
 
     public static void error(String msg) {
-        logger.log(Level.SEVERE, msg);
-        System.exit(Level.SEVERE.intValue());
+        logger.error(msg);
+        System.exit(1);
     }
 
     public static void warn(String msg) {
-        logger.log(Level.WARNING, msg);
+        logger.warn(msg);
+    }
+
+    public static void stLog(Map<String, STElement> symbolTable) {
+        symbolTable.forEach((key, value) -> {
+            if (value.getValue() == null) {
+                logger.warn("Identifier \"" + key + "\" not used.");
+            }
+        });
+        logger.info("Symbol Table: " + symbolTable);
     }
 }

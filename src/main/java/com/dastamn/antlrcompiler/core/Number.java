@@ -10,19 +10,19 @@ public class Number {
         this.value = value;
     }
 
-     float asFloat() {
-        return value;
+    int asInt() {
+        return (int) value;
     }
 
-     int asInt() {
-        return (int) value;
+    void setValue(float value) {
+        this.value = value;
     }
 
     public float getValue() {
         return value;
     }
 
-     Number castToInt() {
+    Number castToInt() {
         this.value = (int) value;
         return this;
     }

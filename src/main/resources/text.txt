@@ -1,5 +1,5 @@
 compil Tiny_Language_SII() {
-floatcompil y;
+intcompil y;
 intcompil x;
 
 start
