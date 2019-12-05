@@ -2,28 +2,35 @@ grammar g;
 
 /*parser*/
 
-axiom: progName L_BR ((varDec SEMI_COLON)* progDesc)? R_BR EOF;
-progName: 'compil' PROG_NAME L_PAREN R_PAREN;
-varDec: VAR_TYPE idList;
+axiom: importLib+? MODIFIER? 'class_SJ' CLASS_NAME L_BR declaration* mainBlock? R_BR EOF;
+importLib: 'import' (LIBRARY | ID) SEMI_COLON+;
+declaration: VAR_TYPE idList SEMI_COLON+;
 idList: ID (COMA ID)*;
-progDesc: 'start' instruction*;
-instruction: (affectation | scan | print | condition) SEMI_COLON;
-affectation: ID EQ expression;
-expression : L_PAREN expression R_PAREN # Paren
+mainBlock: 'main_SJ' instBlock;
+instBlock: L_BR instruction* R_BR;
+instruction: (affectation | expression | input | output) SEMI_COLON+
+            | condition;
+affectation: ID ASSIGN expression;
+expression : L_PAREN expression R_PAREN # ExpParen
             | MINUS expression #UnaryMinus
             | expression TIMES expression # Times
             | expression DIV expression # Div
             | expression PLUS expression # Plus
             | expression MINUS expression # Minus
             | NUMBER # Number
+            | STR # Str
             | ID # Id;
-condition: ifStatement thenBlock elseBlock? 'endif';
-ifStatement: 'if' L_PAREN evaluation R_PAREN 'then';
-thenBlock: instruction+;
-elseBlock: 'else' instruction+ | 'else' ifStatement instruction+;
-evaluation: expression (GT | LT) expression;
-scan: 'scancompil' L_PAREN idList R_PAREN;
-print: 'printcompil' L_PAREN  (idList | STR) R_PAREN;
+condition: ifStatement thenBlock elseBlock?;
+thenBlock: (instBlock | instruction);
+ifStatement: 'Si' L_PAREN evaluation R_PAREN 'Alors';
+evaluation: L_PAREN evaluation R_PAREN # EvalParen
+            | expression (GT | GTE | LT | LTE | EQ | NOT_EQ) expression # Comp
+            | NOT evaluation # Not
+            | evaluation AND evaluation # And
+            | evaluation OR evaluation # Or;
+elseBlock: 'Sinon' thenBlock | 'Sinon' ifStatement thenBlock;
+input: 'In_SJ' L_PAREN FORMAT COMA idList R_PAREN;
+output: 'Out_SJ' L_PAREN STR (COMA idList)? R_PAREN;
 
 /*lexer*/
 
@@ -32,18 +39,27 @@ fragment LOWERCASE: [a-z];
 fragment UPPERCASE: [A-Z];
 fragment ANYCASE: LOWERCASE | UPPERCASE;
 
-fragment INT: 'intcompil';
-fragment FLOAT: 'floatcompil';
+fragment INT: 'int_SJ';
+fragment FLOAT: 'float_SJ';
+fragment STRING: 'string_SJ';
+fragment INT_FORMAT: '%d';
+fragment FLOAT_FORMAT: '%f';
+fragment STRING_FORMAT: '%s';
 
 fragment LINE_COMMENT: '//'  (LINE_COMMENT | ~[\n\r])*;
 fragment MULTI_LINE_COMMENT: '/*' (LINE_COMMENT | .)*? '*/';
 
-PROG_NAME: UPPERCASE (ANYCASE | DIGIT | UNDERSCORE)*;
-VAR_TYPE: INT | FLOAT;
-NUMBER: DIGIT+ | DIGIT* [.,] DIGIT+;
+CLASS_NAME: UPPERCASE (DIGIT | ANYCASE)*;
+MODIFIER: 'public' | 'protected';
+VAR_TYPE: INT | FLOAT | STRING;
 ID: ANYCASE (DIGIT | ANYCASE)*;
-STR: '"'(~[\n\r"]|'\\"')*'"';
+LIBRARY: ANYCASE (ANYCASE | DIGIT | UNDERSCORE | POINT)*;
+NUMBER: DIGIT+ | DIGIT* [.,] DIGIT+;
+FORMAT: QUOT (INT_FORMAT | FLOAT_FORMAT | STRING_FORMAT | ' ')+ QUOT;
+STR: QUOT (~[\n\r"]|'\\"')* QUOT;
 
+QUOT: '"';
+POINT: '.';
 SEMI_COLON: ';';
 COMA: ',';
 UNDERSCORE: '_';
@@ -53,9 +69,16 @@ TIMES: '*';
 DIV: '/';
 PLUS: '+';
 MINUS: '-';
-EQ: '=';
+ASSIGN: ':=';
 GT: '>';
+GTE: '>=';
 LT: '<';
+LTE: '<=';
+EQ: '=';
+NOT_EQ: '!=';
+AND: '&';
+OR: '|';
+NOT: '!';
 L_BR: '{';
 R_BR: '}';
 

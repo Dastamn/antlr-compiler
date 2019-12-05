@@ -1,13 +1,17 @@
-compil Tiny_Language_SII() {
-intcompil y;
-intcompil x;
+import Small_Java.lang;
 
-start
-x = 2;
-if (x > 1) then
-    x = x + 1;
-else
-    x = x - 1;
-endif;
+class_SJ Test {
+
+    int_SJ x, y;
+    string_SJ str;
+
+    main_SJ {
+        x := 4;
+        Si (1>0) Alors {
+            x := x + 1;
+        } Sinon {
+            x := x - 1;
+        }
+    }
 
 }

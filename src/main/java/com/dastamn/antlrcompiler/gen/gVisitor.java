@@ -17,17 +17,17 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAxiom(gParser.AxiomContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#progName}.
+	 * Visit a parse tree produced by {@link gParser#importLib}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitProgName(gParser.ProgNameContext ctx);
+	T visitImportLib(gParser.ImportLibContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#varDec}.
+	 * Visit a parse tree produced by {@link gParser#declaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitVarDec(gParser.VarDecContext ctx);
+	T visitDeclaration(gParser.DeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#idList}.
 	 * @param ctx the parse tree
@@ -35,11 +35,17 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIdList(gParser.IdListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#progDesc}.
+	 * Visit a parse tree produced by {@link gParser#mainBlock}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitProgDesc(gParser.ProgDescContext ctx);
+	T visitMainBlock(gParser.MainBlockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#instBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstBlock(gParser.InstBlockContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#instruction}.
 	 * @param ctx the parse tree
@@ -52,6 +58,13 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAffectation(gParser.AffectationContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Str}
+	 * labeled alternative in {@link gParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStr(gParser.StrContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code Div}
 	 * labeled alternative in {@link gParser#expression}.
@@ -95,6 +108,13 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPlus(gParser.PlusContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ExpParen}
+	 * labeled alternative in {@link gParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpParen(gParser.ExpParenContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code Minus}
 	 * labeled alternative in {@link gParser#expression}.
 	 * @param ctx the parse tree
@@ -102,24 +122,11 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMinus(gParser.MinusContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code Paren}
-	 * labeled alternative in {@link gParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParen(gParser.ParenContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link gParser#condition}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitCondition(gParser.ConditionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link gParser#ifStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIfStatement(gParser.IfStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#thenBlock}.
 	 * @param ctx the parse tree
@@ -127,27 +134,62 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitThenBlock(gParser.ThenBlockContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link gParser#ifStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfStatement(gParser.IfStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Not}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNot(gParser.NotContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Or}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOr(gParser.OrContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code And}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnd(gParser.AndContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code EvalParen}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEvalParen(gParser.EvalParenContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Comp}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComp(gParser.CompContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link gParser#elseBlock}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitElseBlock(gParser.ElseBlockContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#evaluation}.
+	 * Visit a parse tree produced by {@link gParser#input}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitEvaluation(gParser.EvaluationContext ctx);
+	T visitInput(gParser.InputContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#scan}.
+	 * Visit a parse tree produced by {@link gParser#output}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitScan(gParser.ScanContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link gParser#print}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPrint(gParser.PrintContext ctx);
+	T visitOutput(gParser.OutputContext ctx);
 }

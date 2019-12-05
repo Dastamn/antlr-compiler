@@ -18,25 +18,25 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitAxiom(gParser.AxiomContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#progName}.
+	 * Enter a parse tree produced by {@link gParser#importLib}.
 	 * @param ctx the parse tree
 	 */
-	void enterProgName(gParser.ProgNameContext ctx);
+	void enterImportLib(gParser.ImportLibContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#progName}.
+	 * Exit a parse tree produced by {@link gParser#importLib}.
 	 * @param ctx the parse tree
 	 */
-	void exitProgName(gParser.ProgNameContext ctx);
+	void exitImportLib(gParser.ImportLibContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#varDec}.
+	 * Enter a parse tree produced by {@link gParser#declaration}.
 	 * @param ctx the parse tree
 	 */
-	void enterVarDec(gParser.VarDecContext ctx);
+	void enterDeclaration(gParser.DeclarationContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#varDec}.
+	 * Exit a parse tree produced by {@link gParser#declaration}.
 	 * @param ctx the parse tree
 	 */
-	void exitVarDec(gParser.VarDecContext ctx);
+	void exitDeclaration(gParser.DeclarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#idList}.
 	 * @param ctx the parse tree
@@ -48,15 +48,25 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitIdList(gParser.IdListContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#progDesc}.
+	 * Enter a parse tree produced by {@link gParser#mainBlock}.
 	 * @param ctx the parse tree
 	 */
-	void enterProgDesc(gParser.ProgDescContext ctx);
+	void enterMainBlock(gParser.MainBlockContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#progDesc}.
+	 * Exit a parse tree produced by {@link gParser#mainBlock}.
 	 * @param ctx the parse tree
 	 */
-	void exitProgDesc(gParser.ProgDescContext ctx);
+	void exitMainBlock(gParser.MainBlockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link gParser#instBlock}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstBlock(gParser.InstBlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#instBlock}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstBlock(gParser.InstBlockContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#instruction}.
 	 * @param ctx the parse tree
@@ -77,6 +87,18 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAffectation(gParser.AffectationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Str}
+	 * labeled alternative in {@link gParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterStr(gParser.StrContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Str}
+	 * labeled alternative in {@link gParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitStr(gParser.StrContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code Div}
 	 * labeled alternative in {@link gParser#expression}.
@@ -150,6 +172,18 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitPlus(gParser.PlusContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ExpParen}
+	 * labeled alternative in {@link gParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpParen(gParser.ExpParenContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ExpParen}
+	 * labeled alternative in {@link gParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpParen(gParser.ExpParenContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code Minus}
 	 * labeled alternative in {@link gParser#expression}.
 	 * @param ctx the parse tree
@@ -162,18 +196,6 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitMinus(gParser.MinusContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code Paren}
-	 * labeled alternative in {@link gParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterParen(gParser.ParenContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code Paren}
-	 * labeled alternative in {@link gParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitParen(gParser.ParenContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link gParser#condition}.
 	 * @param ctx the parse tree
 	 */
@@ -183,16 +205,6 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCondition(gParser.ConditionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link gParser#ifStatement}.
-	 * @param ctx the parse tree
-	 */
-	void enterIfStatement(gParser.IfStatementContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link gParser#ifStatement}.
-	 * @param ctx the parse tree
-	 */
-	void exitIfStatement(gParser.IfStatementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#thenBlock}.
 	 * @param ctx the parse tree
@@ -204,6 +216,76 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitThenBlock(gParser.ThenBlockContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link gParser#ifStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfStatement(gParser.IfStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#ifStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfStatement(gParser.IfStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Not}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void enterNot(gParser.NotContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Not}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void exitNot(gParser.NotContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Or}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void enterOr(gParser.OrContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Or}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void exitOr(gParser.OrContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code And}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnd(gParser.AndContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code And}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnd(gParser.AndContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code EvalParen}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void enterEvalParen(gParser.EvalParenContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code EvalParen}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void exitEvalParen(gParser.EvalParenContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Comp}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void enterComp(gParser.CompContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Comp}
+	 * labeled alternative in {@link gParser#evaluation}.
+	 * @param ctx the parse tree
+	 */
+	void exitComp(gParser.CompContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link gParser#elseBlock}.
 	 * @param ctx the parse tree
 	 */
@@ -214,33 +296,23 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitElseBlock(gParser.ElseBlockContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#evaluation}.
+	 * Enter a parse tree produced by {@link gParser#input}.
 	 * @param ctx the parse tree
 	 */
-	void enterEvaluation(gParser.EvaluationContext ctx);
+	void enterInput(gParser.InputContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#evaluation}.
+	 * Exit a parse tree produced by {@link gParser#input}.
 	 * @param ctx the parse tree
 	 */
-	void exitEvaluation(gParser.EvaluationContext ctx);
+	void exitInput(gParser.InputContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#scan}.
+	 * Enter a parse tree produced by {@link gParser#output}.
 	 * @param ctx the parse tree
 	 */
-	void enterScan(gParser.ScanContext ctx);
+	void enterOutput(gParser.OutputContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#scan}.
+	 * Exit a parse tree produced by {@link gParser#output}.
 	 * @param ctx the parse tree
 	 */
-	void exitScan(gParser.ScanContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link gParser#print}.
-	 * @param ctx the parse tree
-	 */
-	void enterPrint(gParser.PrintContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link gParser#print}.
-	 * @param ctx the parse tree
-	 */
-	void exitPrint(gParser.PrintContext ctx);
+	void exitOutput(gParser.OutputContext ctx);
 }

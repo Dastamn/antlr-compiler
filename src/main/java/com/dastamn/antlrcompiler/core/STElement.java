@@ -1,32 +1,36 @@
 package com.dastamn.antlrcompiler.core;
 
+import com.dastamn.antlrcompiler.util.Logger;
+
 public class STElement {
 
-    private Number number;
+    private Value value;
     private String type;
 
-    public Number getNumber() {
-        return number;
+    public Value getValue() {
+        return value;
     }
 
     public String getType() {
         return type;
     }
 
-    public Float getValue() {
-        return number != null ? type.equals("floatcompil") ? number.getValue() : number.asInt() : null;
-    }
-
-    public void setNumber(Number number) {
-        this.number = type.equals("intcompil") ? number.castToInt() : number;
-    }
-
-    public void setNumberValue(float value) {
-        value = type.equals("intcompil") ? (int) value : value;
-        if(number == null) {
-            number = new Number(value);
+    public <T> void setValue(T value) {
+        if (this.value == null) this.value = new Value();
+        if (value instanceof Float) {
+            this.value.setValue(type.equals("int_SJ") ? ((Float) value).intValue() : value);
         } else {
-            number.setValue(value);
+            this.value.setValue(value);
+        }
+    }
+
+    public void setValue(Value value) {
+        if (type.equals("string_SJ") && !value.isString()) {
+            Logger.error("Can't assign a number type to a string.");
+        } else if (!type.equals("string_SJ") && value.isString()) {
+            Logger.error("Can't assign a string type to a number.");
+        } else {
+            this.value = type.equals("int_SJ") ? value.castToInt() : value;
         }
     }
 
@@ -37,6 +41,6 @@ public class STElement {
 
     @Override
     public String toString() {
-        return "{type: " + type + ", value: " + number + "}";
+        return "{type: " + type + ", value: " + value + "}";
     }
 }
