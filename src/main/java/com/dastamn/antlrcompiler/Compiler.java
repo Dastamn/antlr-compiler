@@ -3,8 +3,8 @@ package com.dastamn.antlrcompiler;
 import com.dastamn.antlrcompiler.core.STElement;
 import com.dastamn.antlrcompiler.gen.gLexer;
 import com.dastamn.antlrcompiler.gen.gParser;
-import com.dastamn.antlrcompiler.impl.TinyListener;
-import com.dastamn.antlrcompiler.impl.TinyVisitor;
+import com.dastamn.antlrcompiler.impl.SJListener;
+import com.dastamn.antlrcompiler.impl.SJVisitor;
 import com.dastamn.antlrcompiler.util.Logger;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -35,11 +35,11 @@ public class Compiler {
 
     private static void useListener(Map<String, STElement> symbolTable, ParseTree tree) {
         ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(new TinyListener(symbolTable), tree);
+        walker.walk(new SJListener(symbolTable), tree);
     }
 
     private static void userVisitor(Map<String, STElement> symbolTable, ParseTree tree) {
-        TinyVisitor visitor = new TinyVisitor(symbolTable);
+        SJVisitor visitor = new SJVisitor(symbolTable);
         visitor.visit(tree);
     }
 }

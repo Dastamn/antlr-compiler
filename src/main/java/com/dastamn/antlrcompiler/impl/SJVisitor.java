@@ -13,14 +13,14 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TinyVisitor extends gBaseVisitor {
+public class SJVisitor extends gBaseVisitor {
 
     private final Map<String, STElement> symbolTable;
     private final Scanner scanner;
     private boolean ioImport;
     private boolean langImport;
 
-    public TinyVisitor(Map<String, STElement> symbolTable) {
+    public SJVisitor(Map<String, STElement> symbolTable) {
         this.symbolTable = symbolTable;
         this.scanner = new Scanner(System.in);
         this.ioImport = this.langImport = false;

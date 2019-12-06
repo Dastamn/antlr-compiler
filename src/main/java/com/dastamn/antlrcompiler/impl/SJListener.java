@@ -7,13 +7,14 @@ import com.dastamn.antlrcompiler.gen.gBaseListener;
 import java.util.Map;
 import java.util.Stack;
 
-public class TinyListener extends gBaseListener {
+public class SJListener extends gBaseListener {
 
     private final Map<String, STElement> symbolTable;
-    private final Stack<Value> values = new Stack<>();
+    private final Stack<Value> values;
 
-    public TinyListener(Map<String, STElement> symbolTable) {
+    public SJListener(Map<String, STElement> symbolTable) {
         this.symbolTable = symbolTable;
+        this.values = new Stack<>();
     }
 
 //    @Override
