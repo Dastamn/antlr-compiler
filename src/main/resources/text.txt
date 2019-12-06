@@ -1,5 +1,6 @@
 import Small_Java.lang;
 import Small_Java.io;
+import test;
 
 class_SJ Test {
 

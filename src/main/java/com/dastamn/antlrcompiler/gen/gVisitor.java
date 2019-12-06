@@ -23,6 +23,12 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitImportLib(gParser.ImportLibContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link gParser#lib}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLib(gParser.LibContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link gParser#declaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

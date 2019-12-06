@@ -28,13 +28,13 @@ public class TinyVisitor extends gBaseVisitor {
 
     @Override
     public Object visitImportLib(gParser.ImportLibContext ctx) {
-        if (ctx.LIBRARY() != null) {
-            if (ctx.LIBRARY().getText().equals("Small_Java.lang")) {
+        if (ctx.lib() != null) {
+            if (ctx.lib().getText().equals("Small_Java.lang")) {
                 langImport = true;
-            } else if (ctx.LIBRARY().getText().equals("Small_Java.io")) {
+            } else if (ctx.lib().getText().equals("Small_Java.io")) {
                 ioImport = true;
             } else {
-                Logger.warn("Unknown library: " + ctx.LIBRARY().getText());
+                Logger.warn("Unknown library: " + ctx.lib().getText()+".");
             }
         }
         return null;

@@ -28,6 +28,16 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitImportLib(gParser.ImportLibContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link gParser#lib}.
+	 * @param ctx the parse tree
+	 */
+	void enterLib(gParser.LibContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#lib}.
+	 * @param ctx the parse tree
+	 */
+	void exitLib(gParser.LibContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link gParser#declaration}.
 	 * @param ctx the parse tree
 	 */
