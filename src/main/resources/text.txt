@@ -1,17 +1,15 @@
 import Small_Java.lang;
+import Small_Java.io;
 
 class_SJ Test {
 
-    int_SJ x, y;
-    string_SJ str;
+    int_SJ x, w;
+    float_SJ y, z;
+    string_SJ name;
 
     main_SJ {
-        x := 4;
-        Si (1>0) Alors {
-            x := x + 1;
-        } Sinon {
-            x := x - 1;
-        }
+        x := 3 + 2;
+        w := x + 1;
     }
 
 }

@@ -1,14 +1,17 @@
 package com.dastamn.antlrcompiler.impl;
 
 import com.dastamn.antlrcompiler.core.STElement;
+import com.dastamn.antlrcompiler.core.Type;
 import com.dastamn.antlrcompiler.core.Value;
 import com.dastamn.antlrcompiler.gen.gBaseVisitor;
 import com.dastamn.antlrcompiler.gen.gParser;
 import com.dastamn.antlrcompiler.util.Logger;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TinyVisitor extends gBaseVisitor {
 
@@ -45,7 +48,7 @@ public class TinyVisitor extends gBaseVisitor {
                     if (id.length() > 10) {
                         Logger.error("Identifier name must not exceed 10 characters.");
                     }
-                    symbolTable.put(id, new STElement().setType(type));
+                    symbolTable.put(id, new STElement().setType(type).setName(id));
                 });
         return null;
     }
@@ -60,9 +63,10 @@ public class TinyVisitor extends gBaseVisitor {
         String id = ctx.ID().getText();
         STElement stElement = symbolTable.get(ctx.ID().getText());
         if (stElement != null) {
-            stElement.setValue((Value) this.visit(ctx.expression()));
+            Value v = (Value) this.visit(ctx.expression());
+            stElement.setValue(v);
         } else {
-            Logger.error("Identifier \"" + id + "\" not declared.");
+            Logger.notDeclared(id);
         }
         return null;
     }
@@ -75,7 +79,7 @@ public class TinyVisitor extends gBaseVisitor {
     @Override
     public Object visitTimes(gParser.TimesContext ctx) {
         if (!langImport) {
-            Logger.error("Library \"Small_Java.lang\" not imported.");
+            Logger.libraryNotImported("Small_Java.lang");
         }
         return ((Value) this.visit(ctx.expression(0))).times((Value) this.visit(ctx.expression(1)));
     }
@@ -83,7 +87,7 @@ public class TinyVisitor extends gBaseVisitor {
     @Override
     public Object visitDiv(gParser.DivContext ctx) {
         if (!langImport) {
-            Logger.error("Library \"Small_Java.lang\" not imported.");
+            Logger.libraryNotImported("Small_Java.lang");
         }
         return ((Value) this.visit(ctx.expression(0))).div((Value) this.visit(ctx.expression(1)));
     }
@@ -91,7 +95,7 @@ public class TinyVisitor extends gBaseVisitor {
     @Override
     public Object visitPlus(gParser.PlusContext ctx) {
         if (!langImport) {
-            Logger.error("Library \"Small_Java.lang\" not imported.");
+            Logger.libraryNotImported("Small_Java.lang");
         }
         return ((Value) this.visit(ctx.expression(0))).plus((Value) this.visit(ctx.expression(1)));
     }
@@ -99,7 +103,7 @@ public class TinyVisitor extends gBaseVisitor {
     @Override
     public Value visitMinus(gParser.MinusContext ctx) {
         if (!langImport) {
-            Logger.error("Library \"Small_Java.lang\" not imported.");
+            Logger.libraryNotImported("Small_Java.lang");
         }
         return ((Value) this.visit(ctx.expression(0))).minus((Value) this.visit(ctx.expression(1)));
     }
@@ -107,7 +111,7 @@ public class TinyVisitor extends gBaseVisitor {
     @Override
     public Value visitUnaryMinus(gParser.UnaryMinusContext ctx) {
         if (!langImport) {
-            Logger.error("Library \"Small_Java.lang\" not imported.");
+            Logger.libraryNotImported("Small_Java.lang");
         }
         return ((Value) this.visit(ctx.expression())).neg();
     }
@@ -120,10 +124,10 @@ public class TinyVisitor extends gBaseVisitor {
     @Override
     public Value visitStr(gParser.StrContext ctx) {
         if (!langImport) {
-            Logger.error("Library \"Small_Java.lang\" not imported.");
+            Logger.libraryNotImported("Small_Java.lang");
         }
         String str = ctx.getText();
-        return new Value(str.substring(1, str.length() - 1).replace("\"\"", "\""));
+        return new Value(str.substring(1, str.length() - 1).replaceAll("\\\\\"", "\""));
     }
 
     @Override
@@ -134,9 +138,9 @@ public class TinyVisitor extends gBaseVisitor {
             if (stElement.getValue() != null) {
                 return stElement.getValue();
             }
-            Logger.error("Identifier \"" + id + "\" not initialised.");
+            Logger.notInitialised(id);
         } else {
-            Logger.error("Identifier \"" + id + "\" not declared.");
+            Logger.notDeclared(id);
         }
         return null;
     }
@@ -151,7 +155,7 @@ public class TinyVisitor extends gBaseVisitor {
         Value left = (Value) this.visit(ctx.expression(0));
         Value right = (Value) this.visit(ctx.expression(1));
         if (left.isString() || right.isString()) {
-            Logger.error("Can't evaluate a string expression.");
+            Logger.error("Can't evaluate a \"" + Type.STRING_SJ + "\" type.");
         }
         switch (ctx.getChild(1).getText()) {
             case ">":
@@ -204,151 +208,117 @@ public class TinyVisitor extends gBaseVisitor {
     @Override
     public Object visitInput(gParser.InputContext ctx) {
         if (!ioImport) {
-            Logger.error("Library \"Small_Java.io\" not imported.");
+            Logger.libraryNotImported("Small_Java.io");
         }
-        return super.visitInput(ctx);
+        String[] formats = ctx.FORMAT().getText()
+                .substring(1, ctx.FORMAT().getText().length() - 1)
+                .replaceAll(" ", "")
+                .split("(?<=\\G.{2})");
+        String[] ids = (String[]) this.visit(ctx.idList());
+        STElement[] stElements = Arrays.stream(ids)
+                .map(id -> {
+                    STElement stElement = symbolTable.get(id);
+                    if (stElement == null) {
+                        Logger.notDeclared(id);
+                    }
+                    return stElement;
+                })
+                .toArray(STElement[]::new);
+        if (ids.length != formats.length) {
+            Logger.error("Count mismatch between formats and identifiers in input instruction.");
+        }
+        for (int i = 0; i < formats.length; i++) {
+            String format = formats[i];
+            switch (format) {
+                case "%d": {
+                    STElement stElement = stElements[i];
+                    if (stElement.getType() != Type.INT_SJ) {
+                        Logger.formatMismatch("%d", stElement.getType().getFormat(), ids[i]);
+                    }
+                    break;
+                }
+                case "%f": {
+                    STElement stElement = stElements[i];
+                    if (stElement.getType() != Type.FLOAT_SJ) {
+                        Logger.formatMismatch("%f", stElement.getType().getFormat(), ids[i]);
+                    }
+                    break;
+                }
+                case "%s": {
+                    STElement stElement = stElements[i];
+                    if (stElement.getType() != Type.STRING_SJ) {
+                        Logger.formatMismatch("%s", stElement.getType().getFormat(), ids[i]);
+                    }
+                    break;
+                }
+            }
+        }
+        Arrays.stream(stElements).forEach(stElement -> {
+            switch (stElement.getType()) {
+                case INT_SJ:
+                    stElement.setValue(scanner.nextInt());
+                    break;
+                case FLOAT_SJ:
+                    stElement.setValue(scanner.nextFloat());
+                    break;
+                case STRING_SJ:
+                    stElement.setValue(scanner.next());
+                    break;
+            }
+        });
+        return null;
     }
 
     @Override
     public Object visitOutput(gParser.OutputContext ctx) {
         if (!ioImport) {
             Logger.error("Library \"Small_Java.io\" not imported.");
+            Logger.libraryNotImported("Small_Java.io");
         }
-        return super.visitOutput(ctx);
+        this.visit(ctx.outputArgs());
+        return null;
     }
 
-    //    @Override
-//    public Object visitVarDec(gParser.VarDecContext ctx) {
-//        String type = ctx.VAR_TYPE().getText();
-//        String[] ids = (String[]) this.visit(ctx.idList());
-//        Arrays.stream(ids).forEach(id -> {
-//            if (!symbolTable.containsKey(id)) {
-//                symbolTable.put(id, new STElement().setType(type));
-//            } else {
-//                Logger.error("Identifier \"" + id + "\" already declared.");
-//            }
-//        });
-//        return null;
-//    }
-//
-//    @Override
-//    public String[] visitIdList(gParser.IdListContext ctx) {
-//        return ctx.getText().split(",");
-//    }
-//
-//    @Override
-//    public Object visitTimes(gParser.TimesContext ctx) {
-//        return ((Number) this.visit(ctx.expression(0))).times((Number) this.visit(ctx.expression(1)));
-//    }
-//
-//    @Override
-//    public Object visitDiv(gParser.DivContext ctx) {
-//        return ((Number) this.visit(ctx.expression(0))).div((Number) this.visit(ctx.expression(1)));
-//    }
-//
-//    @Override
-//    public Object visitPlus(gParser.PlusContext ctx) {
-//        return ((Number) this.visit(ctx.expression(0))).plus((Number) this.visit(ctx.expression(1)));
-//    }
-//
-//    @Override
-//    public Object visitMinus(gParser.MinusContext ctx) {
-//        return ((Number) this.visit(ctx.expression(0))).minus((Number) this.visit(ctx.expression(1)));
-//    }
-//
-//    @Override
-//    public Number visitNumber(gParser.NumberContext ctx) {
-//        return new Number(Float.parseFloat(ctx.getText()));
-//    }
-//
-//    @Override
-//    public Number visitId(gParser.IdContext ctx) {
-//        String id = ctx.getText();
-//        STElement stElement = symbolTable.get(id);
-//        if (stElement != null) {
-//            if (stElement.getNumber() != null) {
-//                return stElement.getNumber();
-//            }
-//            Logger.error("Identifier \"" + id + "\" not initialised.");
-//        } else {
-//            Logger.error("Identifier \"" + id + "\" not declared.");
-//        }
-//        return null;
-//    }
-//
-//    @Override
-//    public Boolean visitEvaluation(gParser.EvaluationContext ctx) {
-//        Number left = (Number) this.visit(ctx.expression(0));
-//        Number right = (Number) this.visit(ctx.expression(1));
-//        return ctx.GT() != null ? left.getValue() > right.getValue() : left.getValue() < right.getValue();
-//    }
-//
-//    @Override
-//    public STElement visitAffectation(gParser.AffectationContext ctx) {
-//        Number res = (Number) this.visit(ctx.expression());
-//        String id = ctx.ID().getText();
-//        STElement stElement = symbolTable.get(id);
-//        if (stElement != null) {
-//            stElement.setNumber(res);
-//        } else {
-//            Logger.error("Identifier \"" + id + "\" not declared.");
-//        }
-//        return stElement;
-//    }
-//
-//    @Override
-//    public Boolean visitIfStatement(gParser.IfStatementContext ctx) {
-//        return (Boolean) this.visit(ctx.evaluation());
-//    }
-//
-//    @Override
-//    public Object visitCondition(gParser.ConditionContext ctx) {
-//        if ((Boolean) this.visit(ctx.ifStatement())) {
-//            this.visit(ctx.thenBlock());
-//        } else if (ctx.elseBlock() != null) {
-//            this.visit(ctx.elseBlock());
-//        }
-//        return null;
-//    }
-//
-//    @Override
-//    public Object visitPrint(gParser.PrintContext ctx) {
-//        if (ctx.STR() != null) {
-//            System.out.println(ctx.STR().getText().replaceAll("(?<!\\\\)\"", "")
-//                    .replaceAll("\\\\\"", "\""));
-//        } else {
-//            String[] ids = (String[]) this.visit(ctx.idList());
-//            Arrays.stream(ids).forEach(id -> {
-//                STElement stElement = symbolTable.get(id);
-//                if (stElement != null) {
-//                    System.out.println(stElement.getValue());
-//                } else {
-//                    Logger.error("Identifier \"" + id + "\" not declared.");
-//                }
-//            });
-//        }
-//        return null;
-//    }
-//
-//    @Override
-//    public Object visitScan(gParser.ScanContext ctx) {
-//        String[] ids = (String[]) this.visit(ctx.idList());
-//        Arrays.stream(ids).forEach(id -> {
-//            STElement stElement = symbolTable.get(id);
-//            if (stElement == null) {
-//                Logger.error("Identifier \"" + id + "\" not declared.");
-//            } else {
-//                String input = scanner.nextLine();
-//                float value = 0;
-//                try {
-//                    value = Float.parseFloat(input);
-//                } catch (NumberFormatException e) {
-//                    Logger.error("Value of \"" + id + "\" must be of type \"" + stElement.getType() +
-//                            "\", got: " + input);
-//                }
-//                stElement.setNumberValue(value);
-//            }
-//        });
-//        return null;
-//    }
+    @Override
+    public Object visitOutputArgs(gParser.OutputArgsContext ctx) {
+        String str = ctx.STR().getText()
+                .substring(1, ctx.STR().getText().length() - 1)
+                .replaceAll("\\\\\"", "\"");
+        if (ctx.outputIdList() != null) {
+            String[] ids = (String[]) this.visit(ctx.outputIdList());
+            Pattern pattern = Pattern.compile("%[dfs]");
+            Matcher matcher = pattern.matcher(str);
+            String[] formats = matcher.results()
+                    .map(MatchResult::group)
+                    .toArray(String[]::new);
+            if (ids.length > formats.length) {
+                Logger.error("More identifiers than type formats in output instruction.");
+            }
+            AtomicInteger index = new AtomicInteger(0);
+            STElement[] stElements = Arrays.stream(ids)
+                    .map(id -> {
+                        STElement stElement = symbolTable.get(id);
+                        if (stElement == null) {
+                            Logger.notDeclared(id);
+                        } else {
+                            if (!stElement.getType().getFormat().equals(formats[index.get()])) {
+                                Logger.formatMismatch(formats[index.get()], stElement.getType().getFormat(), id);
+                            }
+                        }
+                        index.incrementAndGet();
+                        return stElement;
+                    })
+                    .toArray(STElement[]::new);
+            for (STElement stElement : stElements) {
+                str = str.replaceFirst(stElement.getType().getFormat(), String.valueOf(stElement.getValue()));
+            }
+        }
+        System.out.println(str);
+        return null;
+    }
+
+    @Override
+    public String[] visitOutputIdList(gParser.OutputIdListContext ctx) {
+        return (String[]) this.visit(ctx.idList());
+    }
 }

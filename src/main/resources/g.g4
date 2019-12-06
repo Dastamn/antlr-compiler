@@ -28,9 +28,11 @@ evaluation: L_PAREN evaluation R_PAREN # EvalParen
             | NOT evaluation # Not
             | evaluation AND evaluation # And
             | evaluation OR evaluation # Or;
-elseBlock: 'Sinon' thenBlock | 'Sinon' ifStatement thenBlock;
+elseBlock: 'Sinon' (instBlock | instruction) | 'Sinon' ifStatement (instBlock | instruction);
 input: 'In_SJ' L_PAREN FORMAT COMA idList R_PAREN;
-output: 'Out_SJ' L_PAREN STR (COMA idList)? R_PAREN;
+output: 'Out_SJ' L_PAREN outputArgs R_PAREN;
+outputArgs: STR outputIdList?;
+outputIdList: COMA idList;
 
 /*lexer*/
 

@@ -192,4 +192,16 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitOutput(gParser.OutputContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#outputArgs}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOutputArgs(gParser.OutputArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#outputIdList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOutputIdList(gParser.OutputIdListContext ctx);
 }

@@ -19,9 +19,6 @@ public class Value {
     }
 
     private Integer asInt() {
-        if (value instanceof String) {
-            Logger.error("Can't cast a string to a number type.");
-        }
         return ((Float) value).intValue();
     }
 
@@ -37,8 +34,8 @@ public class Value {
         return this;
     }
 
-    public String asString() {
-        return String.valueOf(value);
+    Type getType() {
+        return value instanceof String ? Type.STRING_SJ : value instanceof Float ? Type.FLOAT_SJ : Type.INT_SJ;
     }
 
     public boolean isString() {
@@ -46,26 +43,31 @@ public class Value {
     }
 
     public Value times(Value value) {
-        this.value = asFloat() * value.asFloat();
-        return this;
+        if (isString() || value.isString()) Logger.noStringInArithm();
+        return new Value(asFloat() * value.asFloat());
     }
 
     public Value div(Value value) {
-        this.value = asFloat() / value.asFloat();
-        return this;
+        if (isString() || value.isString()) Logger.noStringInArithm();
+        Float floatValue = value.asFloat();
+        if (floatValue == 0) {
+            Logger.error("Can't divide by zero.");
+        }
+        return new Value(asFloat() / value.asFloat());
     }
 
     public Value plus(Value value) {
-        this.value = asFloat() + value.asFloat();
-        return this;
+        if (isString() || value.isString()) Logger.noStringInArithm();
+        return new Value(asFloat() + value.asFloat());
     }
 
     public Value minus(Value value) {
-        this.value = asFloat() - value.asFloat();
-        return this;
+        if (isString() || value.isString()) Logger.noStringInArithm();
+        return new Value(asFloat() - value.asFloat());
     }
 
     public Value neg() {
+        if (isString()) Logger.noStringInArithm();
         value = -asFloat();
         return this;
     }
@@ -96,6 +98,6 @@ public class Value {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return value == null ? "null" : String.valueOf(value);
     }
 }
