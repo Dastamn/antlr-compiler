@@ -19,7 +19,7 @@ public class Value {
     }
 
     private Integer asInt() {
-        return ((Float) value).intValue();
+        return value instanceof Integer ? (Integer) value : ((Float) value).intValue();
     }
 
     private Float asFloat() {
@@ -45,7 +45,7 @@ public class Value {
 
     public Value times(Value value) {
         if (isString() || value.isString()) Logger.noStringInArithm();
-        return new Value((isFloat() ? asFloat() : asInt()) *  (value.isFloat() ? value.asFloat() : value.asInt()));
+        return new Value((isFloat() ? asFloat() : asInt()) * (value.isFloat() ? value.asFloat() : value.asInt()));
     }
 
     public Value div(Value value) {
@@ -54,17 +54,17 @@ public class Value {
         if (floatValue == 0) {
             Logger.error("Can't divide by zero.");
         }
-        return new Value((isFloat() ? asFloat() : asInt()) /  (value.isFloat() ? value.asFloat() : value.asInt()));
+        return new Value((isFloat() ? asFloat() : asInt()) / (value.isFloat() ? value.asFloat() : value.asInt()));
     }
 
     public Value plus(Value value) {
-        return  new Value(isString() || value.isString() ? toString() + value.toString() :
-                (isFloat() ? asFloat() : asInt()) +  (value.isFloat() ? value.asFloat() : value.asInt()));
+        return new Value(isString() || value.isString() ? toString() + value.toString() :
+                (isFloat() ? asFloat() : asInt()) + (value.isFloat() ? value.asFloat() : value.asInt()));
     }
 
     public Value minus(Value value) {
         if (isString() || value.isString()) Logger.noStringInArithm();
-        return new Value((isFloat() ? asFloat() : asInt()) -  (value.isFloat() ? value.asFloat() : value.asInt()));
+        return new Value((isFloat() ? asFloat() : asInt()) - (value.isFloat() ? value.asFloat() : value.asInt()));
     }
 
     public Value neg() {
@@ -99,6 +99,6 @@ public class Value {
 
     @Override
     public String toString() {
-        return  String.valueOf(value);
+        return String.valueOf(value);
     }
 }

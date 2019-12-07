@@ -71,12 +71,12 @@ public class SJVisitor extends gBaseVisitor {
     }
 
     @Override
-    public Object visitExpParen(gParser.ExpParenContext ctx) {
-        return this.visit(ctx.expression());
+    public Value visitExpParen(gParser.ExpParenContext ctx) {
+        return (Value) this.visit(ctx.expression());
     }
 
     @Override
-    public Object visitTimes(gParser.TimesContext ctx) {
+    public Value visitTimes(gParser.TimesContext ctx) {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
@@ -84,7 +84,7 @@ public class SJVisitor extends gBaseVisitor {
     }
 
     @Override
-    public Object visitDiv(gParser.DivContext ctx) {
+    public Value visitDiv(gParser.DivContext ctx) {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
@@ -92,7 +92,7 @@ public class SJVisitor extends gBaseVisitor {
     }
 
     @Override
-    public Object visitPlus(gParser.PlusContext ctx) {
+    public Value visitPlus(gParser.PlusContext ctx) {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
@@ -146,8 +146,8 @@ public class SJVisitor extends gBaseVisitor {
     }
 
     @Override
-    public Object visitEvalParen(gParser.EvalParenContext ctx) {
-        return this.visit(ctx.evaluation());
+    public Boolean visitEvalParen(gParser.EvalParenContext ctx) {
+        return (Boolean) this.visit(ctx.evaluation());
     }
 
     @Override
@@ -186,7 +186,7 @@ public class SJVisitor extends gBaseVisitor {
     }
 
     @Override
-    public Object visitOr(gParser.OrContext ctx) {
+    public Boolean visitOr(gParser.OrContext ctx) {
         return (Boolean) this.visit(ctx.evaluation(0)) || (Boolean) this.visit(ctx.evaluation(1));
     }
 

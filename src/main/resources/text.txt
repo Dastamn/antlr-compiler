@@ -4,12 +4,21 @@ import test;
 
 class_SJ Test {
 
-    int_SJ x, w;
+    int_SJ x;
     float_SJ y, z;
     string_SJ name;
 
     main_SJ {
-        name := "hh" + "jj" - 5;
+        x := 10;
+        y := 20.0;
+        x := (x + y / 2) + 1;
+        name := "Na" + "zim";
+        Out_SJ("%s is %d", name, x);
+        Si (x > 0) Alors {
+            Out_SJ("in then block");
+        } Sinon {
+            Out_SJ("in else block");
+        }
     }
 
 }
