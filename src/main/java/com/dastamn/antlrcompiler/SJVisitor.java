@@ -117,7 +117,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Value visitNumber(gParser.NumberContext ctx) {
-        return new Value(Float.parseFloat(ctx.getText()));
+        String number = ctx.getText().replace(",", ".");
+        return number.contains(".") ? new Value(Float.parseFloat(number)) : new Value(Integer.parseInt(number));
     }
 
     @Override

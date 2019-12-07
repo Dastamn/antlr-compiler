@@ -23,10 +23,15 @@ public class Value {
     }
 
     private Float asFloat() {
-        if (value instanceof String) {
-            Logger.error("Can't cast a string to a number type.");
-        }
         return value instanceof Integer ? ((Integer) value).floatValue() : (Float) value;
+    }
+
+    private boolean isFloat() {
+        return value instanceof Float;
+    }
+
+    public boolean isString() {
+        return value instanceof String;
     }
 
     Value castToInt() {
@@ -38,13 +43,9 @@ public class Value {
         return value instanceof String ? Type.STRING_SJ : value instanceof Float ? Type.FLOAT_SJ : Type.INT_SJ;
     }
 
-    public boolean isString() {
-        return value instanceof String;
-    }
-
     public Value times(Value value) {
         if (isString() || value.isString()) Logger.noStringInArithm();
-        return new Value(asFloat() * value.asFloat());
+        return new Value((isFloat() ? asFloat() : asInt()) *  (value.isFloat() ? value.asFloat() : value.asInt()));
     }
 
     public Value div(Value value) {
@@ -53,22 +54,22 @@ public class Value {
         if (floatValue == 0) {
             Logger.error("Can't divide by zero.");
         }
-        return new Value(asFloat() / value.asFloat());
+        return new Value((isFloat() ? asFloat() : asInt()) /  (value.isFloat() ? value.asFloat() : value.asInt()));
     }
 
     public Value plus(Value value) {
-        if (isString() || value.isString()) Logger.noStringInArithm();
-        return new Value(asFloat() + value.asFloat());
+        return  new Value(isString() || value.isString() ? toString() + value.toString() :
+                (isFloat() ? asFloat() : asInt()) +  (value.isFloat() ? value.asFloat() : value.asInt()));
     }
 
     public Value minus(Value value) {
         if (isString() || value.isString()) Logger.noStringInArithm();
-        return new Value(asFloat() - value.asFloat());
+        return new Value((isFloat() ? asFloat() : asInt()) -  (value.isFloat() ? value.asFloat() : value.asInt()));
     }
 
     public Value neg() {
         if (isString()) Logger.noStringInArithm();
-        value = -asFloat();
+        value = -(isFloat() ? asFloat() : asInt());
         return this;
     }
 
@@ -98,6 +99,6 @@ public class Value {
 
     @Override
     public String toString() {
-        return value == null ? "null" : String.valueOf(value);
+        return  String.valueOf(value);
     }
 }

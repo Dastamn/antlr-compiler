@@ -9,8 +9,7 @@ class_SJ Test {
     string_SJ name;
 
     main_SJ {
-        x := 3 + 2;
-        w := x + 1;
+        name := "hh" + "jj" - 5;
     }
 
 }
