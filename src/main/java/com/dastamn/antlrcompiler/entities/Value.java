@@ -1,6 +1,6 @@
-package com.dastamn.antlrcompiler.core;
+package com.dastamn.antlrcompiler.entities;
 
-import com.dastamn.antlrcompiler.util.Logger;
+import com.dastamn.antlrcompiler.Logger;
 
 public class Value {
 

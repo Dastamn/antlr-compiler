@@ -1,11 +1,10 @@
-package com.dastamn.antlrcompiler.impl;
+package com.dastamn.antlrcompiler;
 
-import com.dastamn.antlrcompiler.core.STElement;
-import com.dastamn.antlrcompiler.core.Type;
-import com.dastamn.antlrcompiler.core.Value;
+import com.dastamn.antlrcompiler.entities.STElement;
+import com.dastamn.antlrcompiler.entities.Type;
+import com.dastamn.antlrcompiler.entities.Value;
 import com.dastamn.antlrcompiler.gen.gBaseVisitor;
 import com.dastamn.antlrcompiler.gen.gParser;
-import com.dastamn.antlrcompiler.util.Logger;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +19,7 @@ public class SJVisitor extends gBaseVisitor {
     private boolean ioImport;
     private boolean langImport;
 
-    public SJVisitor(Map<String, STElement> symbolTable) {
+    SJVisitor(Map<String, STElement> symbolTable) {
         this.symbolTable = symbolTable;
         this.scanner = new Scanner(System.in);
         this.ioImport = this.langImport = false;
@@ -34,7 +33,7 @@ public class SJVisitor extends gBaseVisitor {
             } else if (ctx.lib().getText().equals("Small_Java.io")) {
                 ioImport = true;
             } else {
-                Logger.warn("Unknown library: " + ctx.lib().getText()+".");
+                Logger.warn("Unknown library: " + ctx.lib().getText() + ".");
             }
         }
         return null;

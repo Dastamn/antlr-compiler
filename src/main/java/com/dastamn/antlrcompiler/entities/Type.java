@@ -1,4 +1,4 @@
-package com.dastamn.antlrcompiler.core;
+package com.dastamn.antlrcompiler.entities;
 
 public enum Type {
 
