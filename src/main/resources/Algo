@@ -1,0 +1,9 @@
+import Small_Java.lang;
+import Small_Java.io;
+
+class_SJ Test {
+	int_SJ  x;
+    main_SJ {
+    	x := 45 + 2 * (6 / 8 - (3 * 5));
+    }
+}

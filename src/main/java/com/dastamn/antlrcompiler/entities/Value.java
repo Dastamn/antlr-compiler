@@ -1,5 +1,4 @@
 package com.dastamn.antlrcompiler.entities;
-
 import com.dastamn.antlrcompiler.Logger;
 
 public class Value {

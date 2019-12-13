@@ -21,6 +21,8 @@ expression : L_PAREN expression R_PAREN # ExpParen
             | NUMBER # Number
             | STR # Str
             | ID # Id;
+ 
+
 condition: ifStatement thenBlock elseBlock?;
 thenBlock: (instBlock | instruction);
 ifStatement: 'Si' L_PAREN evaluation R_PAREN 'Alors';
@@ -34,6 +36,7 @@ input: 'In_SJ' L_PAREN FORMAT COMA idList R_PAREN;
 output: 'Out_SJ' L_PAREN outputArgs R_PAREN;
 outputArgs: STR outputIdList?;
 outputIdList: COMA idList;
+
 
 /*lexer*/
 
