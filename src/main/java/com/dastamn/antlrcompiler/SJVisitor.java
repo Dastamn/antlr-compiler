@@ -75,6 +75,8 @@ public class SJVisitor extends gBaseVisitor {
         STElement stElement = symbolTable.get(ctx.ID().getText());
         if (stElement != null) {
             Value v = (Value) this.visit(ctx.expression());
+            quads.add(new Quads("=", id, tempStack.pop(), id));
+            tempCount = 1;
             stElement.setValue(v);
         } else {
             Logger.notDeclared(id);
@@ -365,7 +367,7 @@ public class SJVisitor extends gBaseVisitor {
         quads.add(new Quads(signe, leftTemp, rightTemp, affect));
         System.out.println(tempStack.toString());
     }
-    
+
     private void makeRPN(ParseTree left, ParseTree root, ParseTree right) {
     	operatorsStack.push(root.getText());
     	if (left.getChildCount() <= 1) rpnStack.push(left.getText());

@@ -2,8 +2,9 @@ import Small_Java.lang;
 import Small_Java.io;
 
 class_SJ Test {
-	int_SJ  x;
+	int_SJ  x, a;
     main_SJ {
     	x := 45 + 2 * (6 / 8 - (3 * 5));
+    	a := x + 5;
     }
 }
