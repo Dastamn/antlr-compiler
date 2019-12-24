@@ -9,7 +9,7 @@ declaration: VAR_TYPE idList SEMI_COLON+;
 idList: ID (COMA ID)*;
 mainBlock: 'main_SJ' instBlock;
 instBlock: L_BR instruction* R_BR;
-instruction: (affectation | expression | input | output) SEMI_COLON+
+instruction: (affectation | input | output) SEMI_COLON+
             | condition;
 affectation: ID ASSIGN expression;
 expression : L_PAREN expression R_PAREN # ExpParen
@@ -21,16 +21,15 @@ expression : L_PAREN expression R_PAREN # ExpParen
             | NUMBER # Number
             | STR # Str
             | ID # Id;
- 
-
 condition: ifStatement thenBlock elseBlock?;
 thenBlock: (instBlock | instruction);
 ifStatement: 'Si' L_PAREN evaluation R_PAREN 'Alors';
 evaluation: L_PAREN evaluation R_PAREN # EvalParen
-            | expression (GT | GTE | LT | LTE | EQ | NOT_EQ) expression # Comp
+            | expression evalOperand expression # Comp
             | NOT evaluation # Not
             | evaluation AND evaluation # And
             | evaluation OR evaluation # Or;
+evalOperand: GT | GTE | LT | LTE | EQ | NOT_EQ;
 elseBlock: 'Sinon' (instBlock | instruction) | 'Sinon' ifStatement (instBlock | instruction);
 input: 'In_SJ' L_PAREN FORMAT COMA idList R_PAREN;
 output: 'Out_SJ' L_PAREN outputArgs R_PAREN;

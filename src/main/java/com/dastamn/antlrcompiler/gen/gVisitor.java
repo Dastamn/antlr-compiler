@@ -181,6 +181,12 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComp(gParser.CompContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link gParser#evalOperand}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEvalOperand(gParser.EvalOperandContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link gParser#elseBlock}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

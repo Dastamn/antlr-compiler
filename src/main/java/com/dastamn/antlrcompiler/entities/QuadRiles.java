@@ -1,12 +1,12 @@
 package com.dastamn.antlrcompiler.entities;
 
-public class Quads { 
+public class QuadRiles {
 	private String operator;
 	private String leftOperand;
 	private String rightOperand;
 	private String affect;
 	
-	public Quads (String operator, String leftOperand, String rightOperand, String affect) {
+	public QuadRiles(String operator, String leftOperand, String rightOperand, String affect) {
 		this.operator 		= operator;
 		this.leftOperand 	= leftOperand;
 		this.rightOperand 	= rightOperand;

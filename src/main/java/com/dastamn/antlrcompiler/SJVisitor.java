@@ -1,9 +1,6 @@
 package com.dastamn.antlrcompiler;
 
-import com.dastamn.antlrcompiler.entities.Quads;
-import com.dastamn.antlrcompiler.entities.STElement;
-import com.dastamn.antlrcompiler.entities.Type;
-import com.dastamn.antlrcompiler.entities.Value;
+import com.dastamn.antlrcompiler.entities.*;
 import com.dastamn.antlrcompiler.gen.gBaseVisitor;
 import com.dastamn.antlrcompiler.gen.gParser;
 
@@ -13,28 +10,30 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class SJVisitor extends gBaseVisitor {
-	private Stack<String> rpnStack = new Stack<String>();
-	private Stack<String> operatorsStack = new Stack<String>();
-	private int tempCount = 1;
-	private String leftTemp;
-	private String rightTemp;
-	private String affect;
-	private Stack<String> tempStack = new Stack<String>();
+//    private Stack<String> rpnStack = new Stack<String>();
+//    private Stack<String> operatorsStack = new Stack<String>();
+//    private int tempCount = 1;
+//    private String leftTemp;
+//    private String rightTemp;
+//    private String affect;
+//    private Stack<String> tempStack = new Stack<String>();
+//    private final LinkedList<QuadRiles> quads;
     private final Map<String, STElement> symbolTable;
-    private final LinkedList<Quads> quads;
+    private QuadGen quadGen;
     private final Scanner scanner;
     private boolean ioImport;
     private boolean langImport;
 
-    SJVisitor(Map<String, STElement> symbolTable, LinkedList<Quads> quads) {
+
+    SJVisitor(Map<String, STElement> symbolTable, /*LinkedList<QuadRiles> quads,*/ QuadGen quadGen) {
         this.symbolTable = symbolTable;
-        this.quads = quads;
+//        this.quads = quads;
         this.scanner = new Scanner(System.in);
         this.ioImport = this.langImport = false;
+        this.quadGen = quadGen;
     }
 
     @Override
@@ -75,9 +74,10 @@ public class SJVisitor extends gBaseVisitor {
         STElement stElement = symbolTable.get(ctx.ID().getText());
         if (stElement != null) {
             Value v = (Value) this.visit(ctx.expression());
-            quads.add(new Quads("=", id, tempStack.pop(), id));
-            tempCount = 1;
+//            quads.add(new QuadRiles("=", id, tempStack.pop(), id));
+//            tempCount = 1;
             stElement.setValue(v);
+            quadGen.drainQuads(id);
         } else {
             Logger.notDeclared(id);
         }
@@ -94,8 +94,9 @@ public class SJVisitor extends gBaseVisitor {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
-        makeQuad("*", ctx.getChild(0), ctx.getChild(2));
-        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
+        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.TIMES().getText());
+//        makeQuad("*", ctx.getChild(0), ctx.getChild(2));
+//        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
         return ((Value) this.visit(ctx.expression(0))).times((Value) this.visit(ctx.expression(1)));
     }
 
@@ -104,8 +105,9 @@ public class SJVisitor extends gBaseVisitor {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
-        makeQuad("/", ctx.getChild(0), ctx.getChild(2));
-        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
+        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.DIV().getText());
+//        makeQuad("/", ctx.getChild(0), ctx.getChild(2));
+//        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
         return ((Value) this.visit(ctx.expression(0))).div((Value) this.visit(ctx.expression(1)));
     }
 
@@ -114,8 +116,9 @@ public class SJVisitor extends gBaseVisitor {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
-        makeQuad("+", ctx.getChild(0), ctx.getChild(2));
-        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
+        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.PLUS().getText());
+//        makeQuad("+", ctx.getChild(0), ctx.getChild(2));
+//        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
         return ((Value) this.visit(ctx.expression(0))).plus((Value) this.visit(ctx.expression(1)));
     }
 
@@ -124,8 +127,9 @@ public class SJVisitor extends gBaseVisitor {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
-        makeQuad("-", ctx.getChild(0), ctx.getChild(2));
-        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
+        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.MINUS().getText());
+//        makeQuad("-", ctx.getChild(0), ctx.getChild(2));
+//        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
         return ((Value) this.visit(ctx.expression(0))).minus((Value) this.visit(ctx.expression(1)));
     }
 
@@ -134,6 +138,7 @@ public class SJVisitor extends gBaseVisitor {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
+        quadGen.makeQuad(ctx.getChild(1), null, "*");
         return ((Value) this.visit(ctx.expression())).neg();
     }
 
@@ -179,7 +184,7 @@ public class SJVisitor extends gBaseVisitor {
         if (left.isString() || right.isString()) {
             Logger.error("Can't evaluate a \"" + Type.STRING_SJ + "\" type.");
         }
-        switch (ctx.getChild(1).getText()) {
+        switch (ctx.evalOperand().getText()) {
             case ">":
                 return left.gt(right);
             case ">=":
@@ -343,39 +348,40 @@ public class SJVisitor extends gBaseVisitor {
     public String[] visitOutputIdList(gParser.OutputIdListContext ctx) {
         return (String[]) this.visit(ctx.idList());
     }
-    
-    private void makeQuad(String signe, ParseTree left, ParseTree right) {
-    	// affect = tempStack.isEmpty() ? "result" : tempStack.pop();
-    	if (tempStack.isEmpty()) {
-    		affect = "result";
-    		tempStack.push(affect);
-    	} else {
-    		affect = tempStack.pop();
-    	}
-        if (right.getChildCount() > 1) {
-        	rightTemp = "temp" + tempCount++;
-        	tempStack.push(rightTemp);
-        } else {
-        	rightTemp = right.getText();
-        }
-        if (left.getChildCount() > 1) {
-        	leftTemp = "temp" + tempCount++;
-        	tempStack.push(leftTemp);
-        } else {
-        	leftTemp = left.getText();
-        }
-        quads.add(new Quads(signe, leftTemp, rightTemp, affect));
-        System.out.println(tempStack.toString());
-    }
 
-    private void makeRPN(ParseTree left, ParseTree root, ParseTree right) {
-    	operatorsStack.push(root.getText());
-    	if (left.getChildCount() <= 1) rpnStack.push(left.getText());
-    	if (right.getChildCount() <= 1) {
-    		rpnStack.push(right.getText());
-    		rpnStack.push(operatorsStack.pop());
-    	}
-    	System.out.println(rpnStack.toString());
-    	System.out.println(operatorsStack.toString());
-    }
+//    private void makeQuad(String signe, ParseTree left, ParseTree right) {
+//        // affect = tempStack.isEmpty() ? "result" : tempStack.pop();
+//        System.out.println("temp: " + tempStack);
+//        if (tempStack.isEmpty()) {
+//            affect = "result";
+//            tempStack.push(affect);
+//        } else {
+//            affect = tempStack.pop();
+//        }
+//        if (right.getChildCount() > 1) {
+//            rightTemp = "temp" + tempCount++;
+//            tempStack.push(rightTemp);
+//        } else {
+//            rightTemp = right.getText();
+//        }
+//        if (left.getChildCount() > 1) {
+//            leftTemp = "temp" + tempCount++;
+//            tempStack.push(leftTemp);
+//        } else {
+//            leftTemp = left.getText();
+//        }
+//        quads.add(new QuadRiles(signe, leftTemp, rightTemp, affect));
+//        System.out.println(tempStack.toString());
+//    }
+//
+//    private void makeRPN(ParseTree left, ParseTree root, ParseTree right) {
+//        operatorsStack.push(root.getText());
+//        if (left.getChildCount() <= 1) rpnStack.push(left.getText());
+//        if (right.getChildCount() <= 1) {
+//            rpnStack.push(right.getText());
+//            rpnStack.push(operatorsStack.pop());
+//        }
+//        System.out.println(rpnStack.toString());
+//        System.out.println(operatorsStack.toString());
+//    }
 }

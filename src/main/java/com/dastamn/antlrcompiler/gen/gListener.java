@@ -296,6 +296,16 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitComp(gParser.CompContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link gParser#evalOperand}.
+	 * @param ctx the parse tree
+	 */
+	void enterEvalOperand(gParser.EvalOperandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#evalOperand}.
+	 * @param ctx the parse tree
+	 */
+	void exitEvalOperand(gParser.EvalOperandContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link gParser#elseBlock}.
 	 * @param ctx the parse tree
 	 */
