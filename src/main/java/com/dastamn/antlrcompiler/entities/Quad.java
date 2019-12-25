@@ -22,6 +22,10 @@ public class Quad {
         return this;
     }
 
+    public String getContainer() {
+        return container;
+    }
+
     public Quad setContainer(String container) {
         this.container = container;
         return this;

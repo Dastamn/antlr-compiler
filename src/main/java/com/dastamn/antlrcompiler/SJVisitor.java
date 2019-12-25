@@ -77,7 +77,7 @@ public class SJVisitor extends gBaseVisitor {
 //            quads.add(new QuadRiles("=", id, tempStack.pop(), id));
 //            tempCount = 1;
             stElement.setValue(v);
-            quadGen.drainQuads(id);
+           // quadGen.drainQuads(id);
         } else {
             Logger.notDeclared(id);
         }
@@ -184,6 +184,8 @@ public class SJVisitor extends gBaseVisitor {
         if (left.isString() || right.isString()) {
             Logger.error("Can't evaluate a \"" + Type.STRING_SJ + "\" type.");
         }
+        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.evalOperand().getText());
+         quadGen.drainQuads(null);
         switch (ctx.evalOperand().getText()) {
             case ">":
                 return left.gt(right);
@@ -222,7 +224,9 @@ public class SJVisitor extends gBaseVisitor {
         if ((Boolean) this.visit(ctx.ifStatement())) {
             this.visit(ctx.thenBlock());
         } else {
-            this.visit(ctx.elseBlock());
+            if(ctx.elseBlock() != null) {
+                this.visit(ctx.elseBlock());
+            }
         }
         return null;
     }

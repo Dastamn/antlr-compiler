@@ -19,6 +19,15 @@ public class QuadGen {
     }
 
     public void makeQuad(ParseTree left, ParseTree right, String operation) {
+        if (operation.matches("[<=>]")) {
+            int i = 0;
+            for (Quad quad : quadStack) {
+                if (quad.getContainer().equals("res")) {
+                    quad.setContainer("temp" + i++);
+                }
+            }
+            drainQuads(null);
+        }
         quadStack.push(new Quad()
                 .setContainer(indexStack.isEmpty() ? "res" : "temp" + indexStack.pop())
                 .setLeftOperand(parseTreeToString(left))
@@ -30,7 +39,7 @@ public class QuadGen {
     public void drainQuads(String id) {
         while (!quadStack.isEmpty()) {
             Quad quad = quadStack.pop();
-            quads.add(quadStack.isEmpty() ? quad.setContainer(id) : quad);
+            quads.add(quadStack.isEmpty() && id != null ? quad.setContainer(id) : quad);
         }
     }
 
@@ -49,6 +58,8 @@ public class QuadGen {
 
     @Override
     public String toString() {
-        return "quads: " + quads.toString();
+        return "quads: " + quads + "\n" +
+                "quad stack: " + quadStack + "\n" +
+                "index stack: " + indexStack;
     }
 }
