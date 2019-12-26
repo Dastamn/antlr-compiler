@@ -1,5 +1,6 @@
 package com.dastamn.antlrcompiler;
 
+import com.dastamn.antlrcompiler.entities.QuadGen;
 import com.dastamn.antlrcompiler.entities.STElement;
 import com.dastamn.antlrcompiler.entities.Type;
 import org.slf4j.LoggerFactory;
@@ -28,12 +29,19 @@ public class Logger {
     }
 
     static void stLog(Map<String, STElement> symbolTable) {
+        String format = "| %-11s | %-11s | %-11s |%n";
+        StringBuilder builder = new StringBuilder("Symbol Table:\n");
+        builder.append(String.format("+-------------+-------------+-------------+%n"));
+        builder.append(String.format("| Identifier  | Type        | Value       |%n"));
+        builder.append(String.format("+-------------+-------------+-------------+%n"));
         symbolTable.forEach((key, value) -> {
             if (value.getValue() == null) {
                 logger.warn("Identifier \"" + key + "\" not used.");
             }
+            builder.append(String.format(format, key, value.getType().getTypeName(), value.getValue()));
         });
-        logger.info("Symbol Table: " + symbolTable);
+        builder.append(String.format("+-------------+-------------+-------------+%n"));
+        System.out.println(builder);
     }
 
     static void notDeclared(String id) {

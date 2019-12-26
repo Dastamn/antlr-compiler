@@ -4,10 +4,15 @@ import Small_Java.io;
 class_SJ Test {
 	int_SJ  x, a;
     main_SJ {
-    	//a := 4 + 2 * 5;
-    	//x := a + 2 + 8 * 9;
-    	Si (5 + 2 + 3 = 6 + 8) Alors {
-
+    	x := 0;
+    	Si (x = 0) Alors {
+    	    x := x + 1;
+    	} Sinon {
+    	    Si (1 > 2) Alors {
+                x := x + 10;
+    	    } Sinon Si (1 = 1) Alors {
+    	        x := x + 5;
+    	    }
     	}
     }
 }

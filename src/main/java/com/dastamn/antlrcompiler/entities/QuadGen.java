@@ -5,17 +5,18 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuadGen {
 
     private List<Quad> quads;
     private Stack<Quad> quadStack;
-    private Stack<Integer> indexStack;
+    private int index;
 
     public QuadGen() {
         this.quadStack = new Stack<>();
         this.quads = new ArrayList<>();
-        this.indexStack = new Stack<>();
+        this.index = -1;
     }
 
     public void makeQuad(ParseTree left, ParseTree right, String operation) {
@@ -29,11 +30,28 @@ public class QuadGen {
             drainQuads(null);
         }
         quadStack.push(new Quad()
-                .setContainer(indexStack.isEmpty() ? "res" : "temp" + indexStack.pop())
+                .setContainer(index == -1 ? "res" : "temp" + index--)
                 .setLeftOperand(parseTreeToString(left))
                 .setRightOperand(parseTreeToString(right))
                 .setOperator(operation)
         );
+    }
+
+    public void affect(String id, Value value) {
+        quads.add(new Quad().setContainer(id).setLeftOperand(value.toString()).setOperator(":="));
+    }
+
+    public void jump(String type) {
+        quads.add(new Quad().setOperator(type).setRightOperand("res"));
+    }
+
+    public void updateLastJump() {
+        for (int i = quads.size() - 1; i >= 0; i--) {
+            if (quads.get(i).getOperator().matches("\\w+")) {
+                quads.get(i).setLeftOperand(String.valueOf(quads.size() + 1));
+                break;
+            }
+        }
     }
 
     public void drainQuads(String id) {
@@ -41,15 +59,14 @@ public class QuadGen {
             Quad quad = quadStack.pop();
             quads.add(quadStack.isEmpty() && id != null ? quad.setContainer(id) : quad);
         }
+        index = -1;
     }
 
     private String parseTreeToString(ParseTree parseTree) {
         if (parseTree == null) return "1";
         String output;
         if (parseTree.getChildCount() > 1) {
-            int index = indexStack.isEmpty() ? -1 : indexStack.peek();
             output = "temp" + (++index);
-            indexStack.push(index);
         } else {
             output = parseTree.getText();
         }
@@ -58,8 +75,11 @@ public class QuadGen {
 
     @Override
     public String toString() {
-        return "quads: " + quads + "\n" +
-                "quad stack: " + quadStack + "\n" +
-                "index stack: " + indexStack;
+        AtomicInteger index = new AtomicInteger(0);
+        return "Quads: {" + "\n" +
+                quads.stream().reduce("", (acc, curr) ->
+                                acc + "\t" + index.incrementAndGet() + "- " + curr + "\n",
+                        (acc, curr) -> acc + curr) +
+                "}";
     }
 }

@@ -10,10 +10,8 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-
 public class SJVisitor extends gBaseVisitor {
-//    private Stack<String> rpnStack = new Stack<String>();
+    //    private Stack<String> rpnStack = new Stack<String>();
 //    private Stack<String> operatorsStack = new Stack<String>();
 //    private int tempCount = 1;
 //    private String leftTemp;
@@ -23,6 +21,7 @@ public class SJVisitor extends gBaseVisitor {
 //    private final LinkedList<QuadRiles> quads;
     private final Map<String, STElement> symbolTable;
     private QuadGen quadGen;
+    private Stack<Boolean> evalStack;
     private final Scanner scanner;
     private boolean ioImport;
     private boolean langImport;
@@ -34,6 +33,7 @@ public class SJVisitor extends gBaseVisitor {
         this.scanner = new Scanner(System.in);
         this.ioImport = this.langImport = false;
         this.quadGen = quadGen;
+        this.evalStack = new Stack<>();
     }
 
     @Override
@@ -73,11 +73,16 @@ public class SJVisitor extends gBaseVisitor {
         String id = ctx.ID().getText();
         STElement stElement = symbolTable.get(ctx.ID().getText());
         if (stElement != null) {
-            Value v = (Value) this.visit(ctx.expression());
+            Value value = (Value) this.visit(ctx.expression());
+            if (evalStack.isEmpty() || evalStack.peek()) {
+                stElement.setValue(value);
+                if(ctx.expression().getChildCount() == 1) {
+                    quadGen.affect(id, value);
+                }
+            }
+            quadGen.drainQuads(id);
 //            quads.add(new QuadRiles("=", id, tempStack.pop(), id));
 //            tempCount = 1;
-            stElement.setValue(v);
-           // quadGen.drainQuads(id);
         } else {
             Logger.notDeclared(id);
         }
@@ -185,19 +190,25 @@ public class SJVisitor extends gBaseVisitor {
             Logger.error("Can't evaluate a \"" + Type.STRING_SJ + "\" type.");
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.evalOperand().getText());
-         quadGen.drainQuads(null);
+        quadGen.drainQuads(null);
         switch (ctx.evalOperand().getText()) {
             case ">":
+                quadGen.jump("BNG");
                 return left.gt(right);
             case ">=":
+                quadGen.jump("BNGE");
                 return left.gte(right);
             case "<":
+                quadGen.jump("BNL");
                 return left.lt(right);
             case "<=":
+                quadGen.jump("BNLE");
                 return left.lte(right);
             case "=":
+                quadGen.jump("BNE");
                 return left.eq(right);
             case "!=":
+                quadGen.jump("BE");
                 return left.notEq(right);
             default:
                 return false;
@@ -221,13 +232,18 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Object visitCondition(gParser.ConditionContext ctx) {
-        if ((Boolean) this.visit(ctx.ifStatement())) {
-            this.visit(ctx.thenBlock());
-        } else {
-            if(ctx.elseBlock() != null) {
-                this.visit(ctx.elseBlock());
-            }
+        boolean noExe = !evalStack.isEmpty() && !evalStack.peek();
+        boolean res = (Boolean) this.visit(ctx.ifStatement());
+        evalStack.push(!noExe && res);
+        this.visit(ctx.thenBlock());
+        quadGen.updateLastJump();
+        if (!noExe) {
+            evalStack.push(!evalStack.pop());
         }
+        if (ctx.elseBlock() != null) {
+            this.visit(ctx.elseBlock());
+        }
+        evalStack.pop();
         return null;
     }
 
@@ -241,62 +257,64 @@ public class SJVisitor extends gBaseVisitor {
         if (!ioImport) {
             Logger.libraryNotImported("Small_Java.io");
         }
-        String[] formats = ctx.FORMAT().getText()
-                .substring(1, ctx.FORMAT().getText().length() - 1)
-                .replaceAll(" ", "")
-                .split("(?<=\\G.{2})");
-        String[] ids = (String[]) this.visit(ctx.idList());
-        STElement[] stElements = Arrays.stream(ids)
-                .map(id -> {
-                    STElement stElement = symbolTable.get(id);
-                    if (stElement == null) {
-                        Logger.notDeclared(id);
+        if (evalStack.isEmpty() || evalStack.peek()) {
+            String[] formats = ctx.FORMAT().getText()
+                    .substring(1, ctx.FORMAT().getText().length() - 1)
+                    .replaceAll(" ", "")
+                    .split("(?<=\\G.{2})");
+            String[] ids = (String[]) this.visit(ctx.idList());
+            STElement[] stElements = Arrays.stream(ids)
+                    .map(id -> {
+                        STElement stElement = symbolTable.get(id);
+                        if (stElement == null) {
+                            Logger.notDeclared(id);
+                        }
+                        return stElement;
+                    })
+                    .toArray(STElement[]::new);
+            if (ids.length != formats.length) {
+                Logger.error("Count mismatch between formats and identifiers in input instruction.");
+            }
+            for (int i = 0; i < formats.length; i++) {
+                String format = formats[i];
+                switch (format) {
+                    case "%d": {
+                        STElement stElement = stElements[i];
+                        if (stElement.getType() != Type.INT_SJ) {
+                            Logger.formatMismatch("%d", stElement.getType().getFormat(), ids[i]);
+                        }
+                        break;
                     }
-                    return stElement;
-                })
-                .toArray(STElement[]::new);
-        if (ids.length != formats.length) {
-            Logger.error("Count mismatch between formats and identifiers in input instruction.");
-        }
-        for (int i = 0; i < formats.length; i++) {
-            String format = formats[i];
-            switch (format) {
-                case "%d": {
-                    STElement stElement = stElements[i];
-                    if (stElement.getType() != Type.INT_SJ) {
-                        Logger.formatMismatch("%d", stElement.getType().getFormat(), ids[i]);
+                    case "%f": {
+                        STElement stElement = stElements[i];
+                        if (stElement.getType() != Type.FLOAT_SJ) {
+                            Logger.formatMismatch("%f", stElement.getType().getFormat(), ids[i]);
+                        }
+                        break;
                     }
-                    break;
-                }
-                case "%f": {
-                    STElement stElement = stElements[i];
-                    if (stElement.getType() != Type.FLOAT_SJ) {
-                        Logger.formatMismatch("%f", stElement.getType().getFormat(), ids[i]);
+                    case "%s": {
+                        STElement stElement = stElements[i];
+                        if (stElement.getType() != Type.STRING_SJ) {
+                            Logger.formatMismatch("%s", stElement.getType().getFormat(), ids[i]);
+                        }
+                        break;
                     }
-                    break;
-                }
-                case "%s": {
-                    STElement stElement = stElements[i];
-                    if (stElement.getType() != Type.STRING_SJ) {
-                        Logger.formatMismatch("%s", stElement.getType().getFormat(), ids[i]);
-                    }
-                    break;
                 }
             }
+            Arrays.stream(stElements).forEach(stElement -> {
+                switch (stElement.getType()) {
+                    case INT_SJ:
+                        stElement.setValue(scanner.nextInt());
+                        break;
+                    case FLOAT_SJ:
+                        stElement.setValue(scanner.nextFloat());
+                        break;
+                    case STRING_SJ:
+                        stElement.setValue(scanner.next());
+                        break;
+                }
+            });
         }
-        Arrays.stream(stElements).forEach(stElement -> {
-            switch (stElement.getType()) {
-                case INT_SJ:
-                    stElement.setValue(scanner.nextInt());
-                    break;
-                case FLOAT_SJ:
-                    stElement.setValue(scanner.nextFloat());
-                    break;
-                case STRING_SJ:
-                    stElement.setValue(scanner.next());
-                    break;
-            }
-        });
         return null;
     }
 
@@ -306,7 +324,9 @@ public class SJVisitor extends gBaseVisitor {
             Logger.error("Library \"Small_Java.io\" not imported.");
             Logger.libraryNotImported("Small_Java.io");
         }
-        this.visit(ctx.outputArgs());
+        if (evalStack.isEmpty() || evalStack.peek()) {
+            this.visit(ctx.outputArgs());
+        }
         return null;
     }
 

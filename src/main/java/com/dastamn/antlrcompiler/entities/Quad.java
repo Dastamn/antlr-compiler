@@ -7,6 +7,10 @@ public class Quad {
     private String rightOperand;
     private String container;
 
+    public String getOperator() {
+        return operator;
+    }
+
     public Quad setOperator(String operator) {
         this.operator = operator;
         return this;
@@ -38,6 +42,9 @@ public class Quad {
 
     @Override
     public String toString() {
-        return "(" + operator + ", " + leftOperand + ", " + rightOperand + ", " + container + ")";
+        return "(" + operator + ", " +
+                (leftOperand == null ? "" : leftOperand) + ", " +
+                (rightOperand == null ? "" : rightOperand) + ", " +
+                (container == null ? "" : container) + ")";
     }
 }
