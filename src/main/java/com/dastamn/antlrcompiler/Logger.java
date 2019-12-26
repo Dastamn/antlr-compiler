@@ -31,16 +31,16 @@ public class Logger {
     static void stLog(Map<String, STElement> symbolTable) {
         String format = "| %-11s | %-11s | %-11s |%n";
         StringBuilder builder = new StringBuilder("Symbol Table:\n");
-        builder.append(String.format("+-------------+-------------+-------------+%n"));
-        builder.append(String.format("| Identifier  | Type        | Value       |%n"));
-        builder.append(String.format("+-------------+-------------+-------------+%n"));
+        builder.append("+-------------+-------------+-------------+\n");
+        builder.append("| Identifier  | Type        | Value       |\n");
+        builder.append("+-------------+-------------+-------------+\n");
         symbolTable.forEach((key, value) -> {
             if (value.getValue() == null) {
                 logger.warn("Identifier \"" + key + "\" not used.");
             }
             builder.append(String.format(format, key, value.getType().getTypeName(), value.getValue()));
         });
-        builder.append(String.format("+-------------+-------------+-------------+%n"));
+        builder.append("+-------------+-------------+-------------+\n");
         System.out.println(builder);
     }
 
