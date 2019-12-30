@@ -76,7 +76,7 @@ public class SJVisitor extends gBaseVisitor {
             Value value = (Value) this.visit(ctx.expression());
             if (evalStack.isEmpty() || evalStack.peek()) {
                 stElement.setValue(value);
-                if(ctx.expression().getChildCount() == 1) {
+                if (ctx.expression().getChildCount() == 1) {
                     quadGen.affect(id, value);
                 }
             }
@@ -193,22 +193,16 @@ public class SJVisitor extends gBaseVisitor {
         quadGen.drainQuads(null);
         switch (ctx.evalOperand().getText()) {
             case ">":
-                quadGen.jump("BNG");
                 return left.gt(right);
             case ">=":
-                quadGen.jump("BNGE");
                 return left.gte(right);
             case "<":
-                quadGen.jump("BNL");
                 return left.lt(right);
             case "<=":
-                quadGen.jump("BNLE");
                 return left.lte(right);
             case "=":
-                quadGen.jump("BNE");
                 return left.eq(right);
             case "!=":
-                quadGen.jump("BE");
                 return left.notEq(right);
             default:
                 return false;
@@ -217,17 +211,27 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Boolean visitNot(gParser.NotContext ctx) {
-        return !((Boolean) this.visit(ctx.evaluation()));
+        Boolean res = (Boolean) this.visit(ctx.evaluation());
+        quadGen.makeQuad(null, null, ctx.NOT().getText());
+        return !res;
     }
 
     @Override
     public Boolean visitAnd(gParser.AndContext ctx) {
-        return (Boolean) this.visit(ctx.evaluation(0)) && (Boolean) this.visit(ctx.evaluation(1));
+        Boolean left = (Boolean) this.visit(ctx.evaluation(0));
+        Boolean right = (Boolean) this.visit(ctx.evaluation(1));
+        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.AND().getText());
+        quadGen.drainQuads(null);
+        return left && right;
     }
 
     @Override
     public Boolean visitOr(gParser.OrContext ctx) {
-        return (Boolean) this.visit(ctx.evaluation(0)) || (Boolean) this.visit(ctx.evaluation(1));
+        Boolean left = (Boolean) this.visit(ctx.evaluation(0));
+        Boolean right = (Boolean) this.visit(ctx.evaluation(1));
+        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.OR().getText());
+        quadGen.drainQuads(null);
+        return left || right;
     }
 
     @Override
@@ -250,6 +254,12 @@ public class SJVisitor extends gBaseVisitor {
     @Override
     public Boolean visitIfStatement(gParser.IfStatementContext ctx) {
         return (Boolean) this.visit(ctx.evaluation());
+    }
+
+    @Override
+    public Object visitThenBlock(gParser.ThenBlockContext ctx) {
+        quadGen.jump();
+        return super.visitThenBlock(ctx);
     }
 
     @Override
