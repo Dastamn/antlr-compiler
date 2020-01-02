@@ -20,6 +20,8 @@ public class Compiler {
         }
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         gParser parser = new gParser(tokenStream);
+        parser.removeErrorListeners();
+        parser.addErrorListener(new ErrorListener());
         ParseTree tree = parser.axiom();
         SJVisitor visitor = new SJVisitor();
         visitor.visit(tree);

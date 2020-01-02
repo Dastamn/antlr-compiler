@@ -1,26 +1,16 @@
 package com.dastamn.antlrcompiler;
 
-import com.dastamn.antlrcompiler.entities.QuadGen;
-import com.dastamn.antlrcompiler.entities.STElement;
+import com.dastamn.antlrcompiler.entities.Library;
 import com.dastamn.antlrcompiler.entities.Type;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class Logger {
 
-    private final static org.slf4j.Logger logger;
-
-    static {
-        logger = LoggerFactory.getLogger("Logger");
-    }
-
     public static void warn(String msg) {
-        logger.warn(msg);
+        System.err.println("WARN: " + msg);
     }
 
     public static void error(String msg) {
-        logger.error(msg);
+        System.err.println("ERROR: " + msg);
         System.exit(1);
     }
 
@@ -40,8 +30,8 @@ public class Logger {
         error("Format mismatch: found \"" + found + "\" expected \"" + expected + "\" for \"" + id + "\".");
     }
 
-    static void libraryNotImported(String lib) {
-        error("Library \"" + lib + "\" not imported.");
+    static void missingLibrary(Library library) {
+        error("missing import: " + library );
     }
 
     public static void noStringInArithm() {

@@ -4,9 +4,7 @@ import com.dastamn.antlrcompiler.entities.*;
 import com.dastamn.antlrcompiler.gen.gBaseVisitor;
 import com.dastamn.antlrcompiler.gen.gParser;
 
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -18,27 +16,26 @@ public class SJVisitor extends gBaseVisitor {
     private QuadGen quadGen;
     private Stack<Boolean> evalStack;
     private final Scanner scanner;
-    private boolean ioImport;
-    private boolean langImport;
+    private Set<Library> libraries;
 
     SJVisitor() {
         this.symbolTable = new SymbolTable();
         this.quadGen = new QuadGen();
         this.evalStack = new Stack<>();
         this.scanner = new Scanner(System.in);
-        this.ioImport = false;
-        this.langImport = false;
+        this.libraries = new HashSet<>();
     }
 
     @Override
     public Object visitImportLib(gParser.ImportLibContext ctx) {
-        if (ctx.lib() != null) {
-            if (ctx.lib().getText().equals("Small_Java.lang")) {
-                langImport = true;
-            } else if (ctx.lib().getText().equals("Small_Java.io")) {
-                ioImport = true;
-            } else {
-                Logger.warn("Unknown library: " + ctx.lib().getText() + ".");
+        for (Library library : Library.values()) {
+            if (library.getName().equals(ctx.lib().getText())) {
+                if (libraries.contains(library)) {
+                    Logger.warn("duplicate import: " +library );
+                } else {
+                    libraries.add(library);
+                }
+                break;
             }
         }
         return null;
@@ -88,8 +85,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Value visitTimes(gParser.TimesContext ctx) {
-        if (!langImport) {
-            Logger.libraryNotImported("Small_Java.lang");
+        if (!libraries.contains(Library.LANG)) {
+            Logger.missingLibrary(Library.LANG);
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.TIMES().getText());
         return ((Value) this.visit(ctx.expression(0))).times((Value) this.visit(ctx.expression(1)));
@@ -97,8 +94,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Value visitDiv(gParser.DivContext ctx) {
-        if (!langImport) {
-            Logger.libraryNotImported("Small_Java.lang");
+        if (!libraries.contains(Library.LANG)) {
+            Logger.missingLibrary(Library.LANG);
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.DIV().getText());
         return ((Value) this.visit(ctx.expression(0))).div((Value) this.visit(ctx.expression(1)));
@@ -106,8 +103,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Value visitPlus(gParser.PlusContext ctx) {
-        if (!langImport) {
-            Logger.libraryNotImported("Small_Java.lang");
+        if (!libraries.contains(Library.LANG)) {
+            Logger.missingLibrary(Library.LANG);
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.PLUS().getText());
         return ((Value) this.visit(ctx.expression(0))).plus((Value) this.visit(ctx.expression(1)));
@@ -115,8 +112,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Value visitMinus(gParser.MinusContext ctx) {
-        if (!langImport) {
-            Logger.libraryNotImported("Small_Java.lang");
+        if (!libraries.contains(Library.LANG)) {
+            Logger.missingLibrary(Library.LANG);
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.MINUS().getText());
         return ((Value) this.visit(ctx.expression(0))).minus((Value) this.visit(ctx.expression(1)));
@@ -124,8 +121,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Value visitUnaryMinus(gParser.UnaryMinusContext ctx) {
-        if (!langImport) {
-            Logger.libraryNotImported("Small_Java.lang");
+        if (!libraries.contains(Library.LANG)) {
+            Logger.missingLibrary(Library.LANG);
         }
         quadGen.makeQuad(ctx.getChild(1), null, "-");
         return ((Value) this.visit(ctx.expression())).neg();
@@ -139,8 +136,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Value visitStr(gParser.StrContext ctx) {
-        if (!langImport) {
-            Logger.libraryNotImported("Small_Java.lang");
+        if (!libraries.contains(Library.LANG)) {
+            Logger.missingLibrary(Library.LANG);
         }
         String str = ctx.getText();
         return new Value(str.substring(1, str.length() - 1).replaceAll("\\\\\"", "\""));
@@ -248,8 +245,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Object visitInput(gParser.InputContext ctx) {
-        if (!ioImport) {
-            Logger.libraryNotImported("Small_Java.io");
+        if (!libraries.contains(Library.IO)) {
+            Logger.missingLibrary(Library.IO);
         }
         if (evalStack.isEmpty() || evalStack.peek()) {
             String[] formats = ctx.FORMAT().getText()
@@ -314,9 +311,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Object visitOutput(gParser.OutputContext ctx) {
-        if (!ioImport) {
-            Logger.error("Library \"Small_Java.io\" not imported.");
-            Logger.libraryNotImported("Small_Java.io");
+        if (!libraries.contains(Library.IO)) {
+            Logger.missingLibrary(Library.IO);
         }
         if (evalStack.isEmpty() || evalStack.peek()) {
             this.visit(ctx.outputArgs());
