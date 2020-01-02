@@ -4,36 +4,30 @@ import com.dastamn.antlrcompiler.entities.*;
 import com.dastamn.antlrcompiler.gen.gBaseVisitor;
 import com.dastamn.antlrcompiler.gen.gParser;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SJVisitor extends gBaseVisitor {
-    //    private Stack<String> rpnStack = new Stack<String>();
-//    private Stack<String> operatorsStack = new Stack<String>();
-//    private int tempCount = 1;
-//    private String leftTemp;
-//    private String rightTemp;
-//    private String affect;
-//    private Stack<String> tempStack = new Stack<String>();
-//    private final LinkedList<QuadRiles> quads;
-    private final Map<String, STElement> symbolTable;
+
+    private final SymbolTable symbolTable;
     private QuadGen quadGen;
     private Stack<Boolean> evalStack;
     private final Scanner scanner;
     private boolean ioImport;
     private boolean langImport;
 
-
-    SJVisitor(Map<String, STElement> symbolTable, /*LinkedList<QuadRiles> quads,*/ QuadGen quadGen) {
-        this.symbolTable = symbolTable;
-//        this.quads = quads;
-        this.scanner = new Scanner(System.in);
-        this.ioImport = this.langImport = false;
-        this.quadGen = quadGen;
+    SJVisitor() {
+        this.symbolTable = new SymbolTable();
+        this.quadGen = new QuadGen();
         this.evalStack = new Stack<>();
+        this.scanner = new Scanner(System.in);
+        this.ioImport = false;
+        this.langImport = false;
     }
 
     @Override
@@ -81,8 +75,6 @@ public class SJVisitor extends gBaseVisitor {
                 }
             }
             quadGen.drainQuads(id);
-//            quads.add(new QuadRiles("=", id, tempStack.pop(), id));
-//            tempCount = 1;
         } else {
             Logger.notDeclared(id);
         }
@@ -100,8 +92,6 @@ public class SJVisitor extends gBaseVisitor {
             Logger.libraryNotImported("Small_Java.lang");
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.TIMES().getText());
-//        makeQuad("*", ctx.getChild(0), ctx.getChild(2));
-//        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
         return ((Value) this.visit(ctx.expression(0))).times((Value) this.visit(ctx.expression(1)));
     }
 
@@ -111,8 +101,6 @@ public class SJVisitor extends gBaseVisitor {
             Logger.libraryNotImported("Small_Java.lang");
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.DIV().getText());
-//        makeQuad("/", ctx.getChild(0), ctx.getChild(2));
-//        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
         return ((Value) this.visit(ctx.expression(0))).div((Value) this.visit(ctx.expression(1)));
     }
 
@@ -122,8 +110,6 @@ public class SJVisitor extends gBaseVisitor {
             Logger.libraryNotImported("Small_Java.lang");
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.PLUS().getText());
-//        makeQuad("+", ctx.getChild(0), ctx.getChild(2));
-//        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
         return ((Value) this.visit(ctx.expression(0))).plus((Value) this.visit(ctx.expression(1)));
     }
 
@@ -133,8 +119,6 @@ public class SJVisitor extends gBaseVisitor {
             Logger.libraryNotImported("Small_Java.lang");
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.MINUS().getText());
-//        makeQuad("-", ctx.getChild(0), ctx.getChild(2));
-//        makeRPN(ctx.getChild(0), ctx.getChild(1), ctx.getChild(2));
         return ((Value) this.visit(ctx.expression(0))).minus((Value) this.visit(ctx.expression(1)));
     }
 
@@ -143,7 +127,7 @@ public class SJVisitor extends gBaseVisitor {
         if (!langImport) {
             Logger.libraryNotImported("Small_Java.lang");
         }
-        quadGen.makeQuad(ctx.getChild(1), null, "*");
+        quadGen.makeQuad(ctx.getChild(1), null, "-");
         return ((Value) this.visit(ctx.expression())).neg();
     }
 
@@ -168,7 +152,7 @@ public class SJVisitor extends gBaseVisitor {
         STElement stElement = symbolTable.get(id);
         if (stElement != null) {
             if (stElement.getValue() != null) {
-                return stElement.getValue();
+                return new Value(stElement.getValue().getRaw());
             }
             Logger.notInitialised(id);
         } else {
@@ -383,39 +367,10 @@ public class SJVisitor extends gBaseVisitor {
         return (String[]) this.visit(ctx.idList());
     }
 
-//    private void makeQuad(String signe, ParseTree left, ParseTree right) {
-//        // affect = tempStack.isEmpty() ? "result" : tempStack.pop();
-//        System.out.println("temp: " + tempStack);
-//        if (tempStack.isEmpty()) {
-//            affect = "result";
-//            tempStack.push(affect);
-//        } else {
-//            affect = tempStack.pop();
-//        }
-//        if (right.getChildCount() > 1) {
-//            rightTemp = "temp" + tempCount++;
-//            tempStack.push(rightTemp);
-//        } else {
-//            rightTemp = right.getText();
-//        }
-//        if (left.getChildCount() > 1) {
-//            leftTemp = "temp" + tempCount++;
-//            tempStack.push(leftTemp);
-//        } else {
-//            leftTemp = left.getText();
-//        }
-//        quads.add(new QuadRiles(signe, leftTemp, rightTemp, affect));
-//        System.out.println(tempStack.toString());
-//    }
-//
-//    private void makeRPN(ParseTree left, ParseTree root, ParseTree right) {
-//        operatorsStack.push(root.getText());
-//        if (left.getChildCount() <= 1) rpnStack.push(left.getText());
-//        if (right.getChildCount() <= 1) {
-//            rpnStack.push(right.getText());
-//            rpnStack.push(operatorsStack.pop());
-//        }
-//        System.out.println(rpnStack.toString());
-//        System.out.println(operatorsStack.toString());
-//    }
+    @Override
+    public Object visitEnd(gParser.EndContext ctx) {
+        symbolTable.print();
+        quadGen.print();
+        return null;
+    }
 }

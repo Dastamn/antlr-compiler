@@ -2,7 +2,8 @@ grammar g;
 
 /*parser*/
 
-axiom: importLib* MODIFIER? 'class_SJ' CLASS_NAME L_BR declaration* mainBlock? R_BR EOF;
+axiom: importLib* MODIFIER? 'class_SJ' CLASS_NAME L_BR declaration* mainBlock? R_BR end;
+end: EOF;
 importLib: 'import' lib SEMI_COLON+;
 lib: LIBRARY | ID;
 declaration: VAR_TYPE idList SEMI_COLON+;

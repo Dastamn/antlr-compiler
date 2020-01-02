@@ -15,33 +15,13 @@ public class Logger {
         logger = LoggerFactory.getLogger("Logger");
     }
 
-    public static void info(String msg) {
-        logger.info(msg);
-    }
-
-    static void warn(String msg) {
+    public static void warn(String msg) {
         logger.warn(msg);
     }
 
     public static void error(String msg) {
         logger.error(msg);
         System.exit(1);
-    }
-
-    static void stLog(Map<String, STElement> symbolTable) {
-        String format = "| %-11s | %-11s | %-11s |%n";
-        StringBuilder builder = new StringBuilder("Symbol Table:\n");
-        builder.append("+-------------+-------------+-------------+\n");
-        builder.append("| Identifier  | Type        | Value       |\n");
-        builder.append("+-------------+-------------+-------------+\n");
-        symbolTable.forEach((key, value) -> {
-            if (value.getValue() == null) {
-                logger.warn("Identifier \"" + key + "\" not used.");
-            }
-            builder.append(String.format(format, key, value.getType().getTypeName(), value.getValue()));
-        });
-        builder.append("+-------------+-------------+-------------+\n");
-        System.out.println(builder);
     }
 
     static void notDeclared(String id) {

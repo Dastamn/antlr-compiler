@@ -7,15 +7,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuadGen {
 
-    private List<Quad> quads;
+    private Quads quads;
     private Stack<Quad> quadStack;
     private String lastOperation;
     private int tempIndex;
     private int resIndex;
+    private String acc;
 
     public QuadGen() {
         this.quadStack = new Stack<>();
-        this.quads = new ArrayList<>();
+        this.quads = new Quads();
         this.tempIndex = -1;
         this.resIndex = -1;
     }
@@ -98,7 +99,7 @@ public class QuadGen {
 
     public void updateLastJump() {
         for (int i = quads.size() - 1; i >= 0; i--) {
-            if (quads.get(i).getOperator().matches("\\w+")) {
+            if (quads.get(i).isJump()) {
                 quads.get(i).setLeftOperand(String.valueOf(quads.size() + 1));
                 break;
             }
@@ -114,7 +115,7 @@ public class QuadGen {
     }
 
     private String parseTreeToString(ParseTree parseTree) {
-        if (parseTree == null) return "-1";
+        if (parseTree == null) return null;
         String output;
         if (parseTree.getChildCount() > 1) {
             output = "temp" + (++tempIndex);
@@ -122,6 +123,23 @@ public class QuadGen {
             output = parseTree.getText();
         }
         return output;
+    }
+
+    public void generateCode() {
+        quads.forEach(quad -> {
+            if (!quad.isEval() && !quad.isJump()) {
+                if (!quad.isAffect()) {
+                    this.acc = quad.getInAcc(this.acc);
+                }
+                this.acc = quad.toObjectCode(this.acc);
+            }
+        });
+    }
+
+    public void print() {
+        System.out.println(this + "\n");
+        generateCode();
+        quads.print();
     }
 
     @Override

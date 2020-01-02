@@ -1,4 +1,4 @@
-// Generated from D:/IdeaProjects/antlrcompiler/src/main/resources\g.g4 by ANTLR 4.7.2
+// Generated from D:/Développement/IdeaProjects/antlr-compiler/src/main/resources\g.g4 by ANTLR 4.7.2
 package com.dastamn.antlrcompiler.gen;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -17,6 +17,16 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAxiom(gParser.AxiomContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link gParser#end}.
+	 * @param ctx the parse tree
+	 */
+	void enterEnd(gParser.EndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#end}.
+	 * @param ctx the parse tree
+	 */
+	void exitEnd(gParser.EndContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#importLib}.
 	 * @param ctx the parse tree

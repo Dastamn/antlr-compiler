@@ -17,6 +17,10 @@ public class Value {
         this.value = value;
     }
 
+    public Object getRaw() {
+        return value;
+    }
+
     private Integer asInt() {
         return value instanceof Integer ? (Integer) value : ((Float) value).intValue();
     }
