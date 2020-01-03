@@ -10,7 +10,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SJVisitor extends gBaseVisitor<Object> {
+public class Visitor extends gBaseVisitor<Object> {
 
     private final SymbolTable symbolTable;
     private final QuadGen quadGen;
@@ -18,7 +18,7 @@ public class SJVisitor extends gBaseVisitor<Object> {
     private final Set<Library> libraries;
     private final Scanner scanner;
 
-    SJVisitor() {
+    Visitor() {
         this.symbolTable = new SymbolTable();
         this.quadGen = new QuadGen();
         this.evalStack = new Stack<>();

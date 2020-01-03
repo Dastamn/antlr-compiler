@@ -23,7 +23,7 @@ public class Compiler {
         parser.removeErrorListeners();
         parser.addErrorListener(new ErrorListener());
         ParseTree tree = parser.axiom();
-        SJVisitor visitor = new SJVisitor();
+        Visitor visitor = new Visitor();
         visitor.visit(tree);
     }
 }
