@@ -34,9 +34,9 @@ evalOperand: GT | GTE | LT | LTE | EQ | NOT_EQ;
 elseBlock: 'Sinon' (instBlock | instruction) | 'Sinon' ifStatement (instBlock | instruction);
 input: 'In_SJ' L_PAREN FORMAT COMA idList R_PAREN;
 output: 'Out_SJ' L_PAREN outputArgs R_PAREN;
-outputArgs: STR outputIdList?;
+outputArgs: strFormat outputIdList?;
+strFormat: (FORMAT | STR);
 outputIdList: COMA idList;
-
 
 /*lexer*/
 
@@ -54,21 +54,12 @@ fragment STRING_FORMAT: '%s';
 
 fragment LINE_COMMENT: '//'  (LINE_COMMENT | ~[\n\r])*;
 fragment MULTI_LINE_COMMENT: '/*' (LINE_COMMENT | .)*? '*/';
-
-CLASS_NAME: UPPERCASE (DIGIT | ANYCASE)*;
-MODIFIER: 'public' | 'protected';
-VAR_TYPE: INT | FLOAT | STRING;
-ID: ANYCASE (DIGIT | ANYCASE)*;
-LIBRARY: ANYCASE (ANYCASE | DIGIT | UNDERSCORE | POINT)*;
-NUMBER: DIGIT+ | DIGIT* [.,] DIGIT+;
-FORMAT: QUOT (INT_FORMAT | FLOAT_FORMAT | STRING_FORMAT | ' ')+ QUOT;
-STR: QUOT (~[\n\r"]|'\\"')* QUOT;
+fragment POINT: '.';
+fragment UNDERSCORE: '_';
 
 QUOT: '"';
-POINT: '.';
 SEMI_COLON: ';';
 COMA: ',';
-UNDERSCORE: '_';
 L_PAREN: '(';
 R_PAREN: ')';
 TIMES: '*';
@@ -87,6 +78,15 @@ OR: '|';
 NOT: '!';
 L_BR: '{';
 R_BR: '}';
+
+CLASS_NAME: UPPERCASE (DIGIT | ANYCASE)*;
+MODIFIER: 'public' | 'protected';
+VAR_TYPE: INT | FLOAT | STRING;
+ID: ANYCASE (DIGIT | ANYCASE)*;
+LIBRARY: ANYCASE (ANYCASE | DIGIT | UNDERSCORE | POINT)*;
+NUMBER: DIGIT+ | DIGIT* [.,] DIGIT+;
+FORMAT: QUOT (INT_FORMAT | FLOAT_FORMAT | STRING_FORMAT | ' ')+ QUOT;
+STR: QUOT (~[\n\r"]|'\\"')* QUOT;
 
 COMMENT: (LINE_COMMENT | MULTI_LINE_COMMENT) -> skip;
 WHITESPACE: [ \t\r\n]+ -> skip;

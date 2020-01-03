@@ -14,7 +14,7 @@ public class SymbolTable extends HashMap<String, STElement> {
         builder.append("+-------------+-------------+-------------+\n");
         this.forEach((key, value) -> {
             if (value.getValue() == null) {
-                Logger.warn("Identifier \"" + key + "\" not used.");
+                Logger.warn("Identifier '" + key + "' not used");
             }
             builder.append(String.format(format, key, value.getType().getTypeName(), value.getValue()));
         });

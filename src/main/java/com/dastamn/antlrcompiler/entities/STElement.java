@@ -8,6 +8,10 @@ public class STElement {
     private Value value;
     private Type type;
 
+    public String getName() {
+        return name;
+    }
+
     public Value getValue() {
         return value;
     }
@@ -34,7 +38,8 @@ public class STElement {
     }
 
     public STElement setName(String name) {
-        this.name = name;return this;
+        this.name = name;
+        return this;
     }
 
     public STElement setType(String type) {
@@ -54,6 +59,6 @@ public class STElement {
 
     @Override
     public String toString() {
-        return "{type: " + type + ", value: " + value + "}";
+        return name;
     }
 }

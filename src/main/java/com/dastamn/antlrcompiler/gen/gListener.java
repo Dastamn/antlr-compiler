@@ -356,6 +356,16 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitOutputArgs(gParser.OutputArgsContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link gParser#strFormat}.
+	 * @param ctx the parse tree
+	 */
+	void enterStrFormat(gParser.StrFormatContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#strFormat}.
+	 * @param ctx the parse tree
+	 */
+	void exitStrFormat(gParser.StrFormatContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link gParser#outputIdList}.
 	 * @param ctx the parse tree
 	 */

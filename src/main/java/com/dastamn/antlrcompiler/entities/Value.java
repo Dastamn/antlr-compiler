@@ -55,7 +55,7 @@ public class Value {
         if (isString() || value.isString()) Logger.noStringInArithm();
         Float floatValue = value.asFloat();
         if (floatValue == 0) {
-            Logger.error("Can't divide by zero.");
+            Logger.error("Math error: can't divide by zero");
         }
         return new Value((isFloat() ? asFloat() : asInt()) / (value.isFloat() ? value.asFloat() : value.asInt()));
     }

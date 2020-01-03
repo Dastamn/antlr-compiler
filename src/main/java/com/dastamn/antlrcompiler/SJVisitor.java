@@ -10,20 +10,20 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SJVisitor extends gBaseVisitor {
+public class SJVisitor extends gBaseVisitor<Object> {
 
     private final SymbolTable symbolTable;
     private QuadGen quadGen;
     private Stack<Boolean> evalStack;
-    private final Scanner scanner;
     private Set<Library> libraries;
+    private final Scanner scanner;
 
     SJVisitor() {
         this.symbolTable = new SymbolTable();
         this.quadGen = new QuadGen();
         this.evalStack = new Stack<>();
-        this.scanner = new Scanner(System.in);
         this.libraries = new HashSet<>();
+        this.scanner = new Scanner(System.in);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class SJVisitor extends gBaseVisitor {
         for (Library library : Library.values()) {
             if (library.getName().equals(ctx.lib().getText())) {
                 if (libraries.contains(library)) {
-                    Logger.warn("duplicate import: " +library );
+                    Logger.warn("Duplicate import: " + library);
                 } else {
                     libraries.add(library);
                 }
@@ -47,7 +47,7 @@ public class SJVisitor extends gBaseVisitor {
         Arrays.stream((String[]) this.visit(ctx.idList()))
                 .forEach(id -> {
                     if (id.length() > 10) {
-                        Logger.error("Identifier name must not exceed 10 characters.");
+                        Logger.error("Identifier must not exceed 10 characters: '" + id + "'");
                     }
                     symbolTable.put(id, new STElement().setType(type).setName(id));
                 });
@@ -168,7 +168,7 @@ public class SJVisitor extends gBaseVisitor {
         Value left = (Value) this.visit(ctx.expression(0));
         Value right = (Value) this.visit(ctx.expression(1));
         if (left.isString() || right.isString()) {
-            Logger.error("Can't evaluate a \"" + Type.STRING_SJ + "\" type.");
+            Logger.error("Can't evaluate a '" + Type.STRING_SJ + "' type in: " + ctx.getText());
         }
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.evalOperand().getText());
         quadGen.drainQuads(null);
@@ -264,7 +264,8 @@ public class SJVisitor extends gBaseVisitor {
                     })
                     .toArray(STElement[]::new);
             if (ids.length != formats.length) {
-                Logger.error("Count mismatch between formats and identifiers in input instruction.");
+                Logger.error("Count mismatch: " + (ids.length > formats.length ? "more" : "less") +
+                        " identifiers than type formats in input instruction: " + ctx.getText());
             }
             for (int i = 0; i < formats.length; i++) {
                 String format = formats[i];
@@ -272,37 +273,43 @@ public class SJVisitor extends gBaseVisitor {
                     case "%d": {
                         STElement stElement = stElements[i];
                         if (stElement.getType() != Type.INT_SJ) {
-                            Logger.formatMismatch("%d", stElement.getType().getFormat(), ids[i]);
+                            Logger.formatMismatch("%d", stElement.getType().getFormat(), ids[i], ctx.getText());
                         }
                         break;
                     }
                     case "%f": {
                         STElement stElement = stElements[i];
                         if (stElement.getType() != Type.FLOAT_SJ) {
-                            Logger.formatMismatch("%f", stElement.getType().getFormat(), ids[i]);
+                            Logger.formatMismatch("%f", stElement.getType().getFormat(), ids[i], ctx.getText());
                         }
                         break;
                     }
                     case "%s": {
                         STElement stElement = stElements[i];
                         if (stElement.getType() != Type.STRING_SJ) {
-                            Logger.formatMismatch("%s", stElement.getType().getFormat(), ids[i]);
+                            Logger.formatMismatch("%s", stElement.getType().getFormat(), ids[i], ctx.getText());
                         }
                         break;
                     }
                 }
             }
             Arrays.stream(stElements).forEach(stElement -> {
-                switch (stElement.getType()) {
-                    case INT_SJ:
-                        stElement.setValue(scanner.nextInt());
-                        break;
-                    case FLOAT_SJ:
-                        stElement.setValue(scanner.nextFloat());
-                        break;
-                    case STRING_SJ:
-                        stElement.setValue(scanner.next());
-                        break;
+                try {
+                    switch (stElement.getType()) {
+                        case INT_SJ:
+                            stElement.setValue(scanner.nextInt());
+                            break;
+                        case FLOAT_SJ:
+                            stElement.setValue(scanner.nextFloat());
+                            break;
+                        case STRING_SJ:
+                            stElement.setValue(scanner.next());
+                            break;
+                    }
+                    quadGen.affect(stElement.getName(), stElement.getValue());
+                } catch (InputMismatchException e) {
+                    Logger.error("Type mismatch: expected '" + stElement.getType() +
+                            "' for identifier '" + stElement + "'");
                 }
             });
         }
@@ -322,8 +329,8 @@ public class SJVisitor extends gBaseVisitor {
 
     @Override
     public Object visitOutputArgs(gParser.OutputArgsContext ctx) {
-        String str = ctx.STR().getText()
-                .substring(1, ctx.STR().getText().length() - 1)
+        String str = ctx.strFormat().getText()
+                .substring(1, ctx.strFormat().getText().length() - 1)
                 .replaceAll("\\\\\"", "\"");
         if (ctx.outputIdList() != null) {
             String[] ids = (String[]) this.visit(ctx.outputIdList());
@@ -333,7 +340,8 @@ public class SJVisitor extends gBaseVisitor {
                     .map(MatchResult::group)
                     .toArray(String[]::new);
             if (ids.length > formats.length) {
-                Logger.error("More identifiers than type formats in output instruction.");
+                Logger.error("Count mismatch: more identifiers than type formats in output instruction: " +
+                        ctx.getParent().getText());
             }
             AtomicInteger index = new AtomicInteger(0);
             STElement[] stElements = Arrays.stream(ids)
@@ -343,7 +351,8 @@ public class SJVisitor extends gBaseVisitor {
                             Logger.notDeclared(id);
                         } else {
                             if (!stElement.getType().getFormat().equals(formats[index.get()])) {
-                                Logger.formatMismatch(formats[index.get()], stElement.getType().getFormat(), id);
+                                Logger.formatMismatch(formats[index.get()], stElement.getType().getFormat(), id,
+                                        ctx.getParent().getText());
                             }
                         }
                         index.incrementAndGet();
@@ -354,7 +363,7 @@ public class SJVisitor extends gBaseVisitor {
                 str = str.replaceFirst(stElement.getType().getFormat(), String.valueOf(stElement.getValue()));
             }
         }
-        System.out.println(str);
+        System.out.println("Out_SJ: " + str);
         return null;
     }
 
