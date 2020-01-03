@@ -1,4 +1,4 @@
-// Generated from D:/IdeaProjects/antlrcompiler/src/main/resources\g.g4 by ANTLR 4.7.2
+// Generated from D:/Développement/IdeaProjects/antlr-compiler/src/main/resources\g.g4 by ANTLR 4.7.2
 package com.dastamn.antlrcompiler.gen;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -16,6 +16,12 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAxiom(gParser.AxiomContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#end}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEnd(gParser.EndContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#importLib}.
 	 * @param ctx the parse tree
@@ -181,6 +187,12 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComp(gParser.CompContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link gParser#evalOperand}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEvalOperand(gParser.EvalOperandContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link gParser#elseBlock}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -204,6 +216,12 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitOutputArgs(gParser.OutputArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#strFormat}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStrFormat(gParser.StrFormatContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#outputIdList}.
 	 * @param ctx the parse tree

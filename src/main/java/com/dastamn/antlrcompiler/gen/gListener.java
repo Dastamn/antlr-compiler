@@ -1,4 +1,4 @@
-// Generated from D:/IdeaProjects/antlrcompiler/src/main/resources\g.g4 by ANTLR 4.7.2
+// Generated from D:/Développement/IdeaProjects/antlr-compiler/src/main/resources\g.g4 by ANTLR 4.7.2
 package com.dastamn.antlrcompiler.gen;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -17,6 +17,16 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAxiom(gParser.AxiomContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link gParser#end}.
+	 * @param ctx the parse tree
+	 */
+	void enterEnd(gParser.EndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#end}.
+	 * @param ctx the parse tree
+	 */
+	void exitEnd(gParser.EndContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#importLib}.
 	 * @param ctx the parse tree
@@ -296,6 +306,16 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitComp(gParser.CompContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link gParser#evalOperand}.
+	 * @param ctx the parse tree
+	 */
+	void enterEvalOperand(gParser.EvalOperandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#evalOperand}.
+	 * @param ctx the parse tree
+	 */
+	void exitEvalOperand(gParser.EvalOperandContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link gParser#elseBlock}.
 	 * @param ctx the parse tree
 	 */
@@ -335,6 +355,16 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitOutputArgs(gParser.OutputArgsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link gParser#strFormat}.
+	 * @param ctx the parse tree
+	 */
+	void enterStrFormat(gParser.StrFormatContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#strFormat}.
+	 * @param ctx the parse tree
+	 */
+	void exitStrFormat(gParser.StrFormatContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#outputIdList}.
 	 * @param ctx the parse tree

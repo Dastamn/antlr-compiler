@@ -2,3 +2,7 @@ target/
 .idea/
 out/
 *.iml
+target/
+.project
+.classpath
+.settings/

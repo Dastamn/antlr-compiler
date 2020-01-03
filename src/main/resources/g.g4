@@ -2,14 +2,15 @@ grammar g;
 
 /*parser*/
 
-axiom: importLib* MODIFIER? 'class_SJ' CLASS_NAME L_BR declaration* mainBlock? R_BR EOF;
+axiom: importLib* MODIFIER? 'class_SJ' CLASS_NAME L_BR declaration* mainBlock? R_BR end;
+end: EOF;
 importLib: 'import' lib SEMI_COLON+;
 lib: LIBRARY | ID;
 declaration: VAR_TYPE idList SEMI_COLON+;
 idList: ID (COMA ID)*;
 mainBlock: 'main_SJ' instBlock;
 instBlock: L_BR instruction* R_BR;
-instruction: (affectation | expression | input | output) SEMI_COLON+
+instruction: (affectation | input | output) SEMI_COLON+
             | condition;
 affectation: ID ASSIGN expression;
 expression : L_PAREN expression R_PAREN # ExpParen
@@ -25,14 +26,16 @@ condition: ifStatement thenBlock elseBlock?;
 thenBlock: (instBlock | instruction);
 ifStatement: 'Si' L_PAREN evaluation R_PAREN 'Alors';
 evaluation: L_PAREN evaluation R_PAREN # EvalParen
-            | expression (GT | GTE | LT | LTE | EQ | NOT_EQ) expression # Comp
+            | expression evalOperand expression # Comp
             | NOT evaluation # Not
             | evaluation AND evaluation # And
             | evaluation OR evaluation # Or;
+evalOperand: GT | GTE | LT | LTE | EQ | NOT_EQ;
 elseBlock: 'Sinon' (instBlock | instruction) | 'Sinon' ifStatement (instBlock | instruction);
 input: 'In_SJ' L_PAREN FORMAT COMA idList R_PAREN;
 output: 'Out_SJ' L_PAREN outputArgs R_PAREN;
-outputArgs: STR outputIdList?;
+outputArgs: strFormat outputIdList?;
+strFormat: (FORMAT | STR);
 outputIdList: COMA idList;
 
 /*lexer*/
@@ -51,21 +54,12 @@ fragment STRING_FORMAT: '%s';
 
 fragment LINE_COMMENT: '//'  (LINE_COMMENT | ~[\n\r])*;
 fragment MULTI_LINE_COMMENT: '/*' (LINE_COMMENT | .)*? '*/';
-
-CLASS_NAME: UPPERCASE (DIGIT | ANYCASE)*;
-MODIFIER: 'public' | 'protected';
-VAR_TYPE: INT | FLOAT | STRING;
-ID: ANYCASE (DIGIT | ANYCASE)*;
-LIBRARY: ANYCASE (ANYCASE | DIGIT | UNDERSCORE | POINT)*;
-NUMBER: DIGIT+ | DIGIT* [.,] DIGIT+;
-FORMAT: QUOT (INT_FORMAT | FLOAT_FORMAT | STRING_FORMAT | ' ')+ QUOT;
-STR: QUOT (~[\n\r"]|'\\"')* QUOT;
+fragment POINT: '.';
+fragment UNDERSCORE: '_';
 
 QUOT: '"';
-POINT: '.';
 SEMI_COLON: ';';
 COMA: ',';
-UNDERSCORE: '_';
 L_PAREN: '(';
 R_PAREN: ')';
 TIMES: '*';
@@ -84,6 +78,15 @@ OR: '|';
 NOT: '!';
 L_BR: '{';
 R_BR: '}';
+
+CLASS_NAME: UPPERCASE (DIGIT | ANYCASE)*;
+MODIFIER: 'public' | 'protected';
+VAR_TYPE: INT | FLOAT | STRING;
+ID: ANYCASE (DIGIT | ANYCASE)*;
+LIBRARY: ANYCASE (ANYCASE | DIGIT | UNDERSCORE | POINT)*;
+NUMBER: DIGIT+ | DIGIT* [.,] DIGIT+;
+FORMAT: QUOT (INT_FORMAT | FLOAT_FORMAT | STRING_FORMAT | ' ')+ QUOT;
+STR: QUOT (~[\n\r"]|'\\"')* QUOT;
 
 COMMENT: (LINE_COMMENT | MULTI_LINE_COMMENT) -> skip;
 WHITESPACE: [ \t\r\n]+ -> skip;
