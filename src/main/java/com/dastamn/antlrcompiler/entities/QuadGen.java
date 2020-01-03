@@ -52,9 +52,16 @@ public class QuadGen {
         } else {
             res.setContainer(tempIndex == -1 ? "res" : "temp" + tempIndex--);
         }
+        String leftString = parseTreeToString(left);
+        String rightString = parseTreeToString(right);
+        if (leftString.startsWith("temp") && rightString.startsWith("temp") && operation.matches("[-/]")) {
+            String temp = leftString;
+            leftString = rightString;
+            rightString = temp;
+        }
         quadStack.push(res
-                .setLeftOperand(isEvalRes ? "res0" : parseTreeToString(left))
-                .setRightOperand(isEvalRes ? "res1" : parseTreeToString(right))
+                .setLeftOperand(isEvalRes ? "res0" : leftString)
+                .setRightOperand(isEvalRes ? "res1" : rightString)
                 .setOperator(operation)
         );
     }
