@@ -87,8 +87,10 @@ public class Quad {
             return acc;
         }
         if (!acc.equals(leftOperand) || operator.matches("[-/]")) {
-            instructions.add(new String[]{acc, "STORE " + acc});
-            instructions.add(new String[]{leftOperand, "LOAD " + leftOperand});
+            if (!acc.equals(leftOperand)) {
+                instructions.add(new String[]{acc, "STORE " + acc});
+                instructions.add(new String[]{leftOperand, "LOAD " + leftOperand});
+            }
             return leftOperand;
         }
         return acc;
