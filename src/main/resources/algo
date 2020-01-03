@@ -3,18 +3,10 @@ import Small_Java.lang;
 import Small_Java.io;
 
 class_SJ Test {
-	float_SJ  a, b, c, d, x, ggggggggg;
+	int_SJ  a, b, c, d, x;
     main_SJ {
 
-    a := 5.0;
-    Out_SJ("%f", a);
-
-
-        /*Si (6 > 5) Alors {
-            In_SJ("%f", a, a);
-        }*/
-
-        /*a := 1;
+        a := 1;
         b := 2;
         c := 3;
 
@@ -24,7 +16,7 @@ class_SJ Test {
             x := 5;
     	} Sinon {
     	    x := 5 + 9;
-    	}*/
+    	}
     }
 
 }

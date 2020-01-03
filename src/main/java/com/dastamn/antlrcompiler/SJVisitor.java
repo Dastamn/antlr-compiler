@@ -13,9 +13,9 @@ import java.util.regex.Pattern;
 public class SJVisitor extends gBaseVisitor<Object> {
 
     private final SymbolTable symbolTable;
-    private QuadGen quadGen;
-    private Stack<Boolean> evalStack;
-    private Set<Library> libraries;
+    private final QuadGen quadGen;
+    private final Stack<Boolean> evalStack;
+    private final Set<Library> libraries;
     private final Scanner scanner;
 
     SJVisitor() {
@@ -49,7 +49,7 @@ public class SJVisitor extends gBaseVisitor<Object> {
                     if (id.length() > 10) {
                         Logger.error("Identifier must not exceed 10 characters: '" + id + "'");
                     }
-                    symbolTable.put(id, new STElement().setType(type).setName(id));
+                    symbolTable.put(id, new STElement(id, type)/*.setType(type).setName(id)*/);
                 });
         return null;
     }

@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuadGen {
 
-    private Quads quads;
-    private Stack<Quad> quadStack;
+    private final Quads quads;
+    private final Stack<Quad> quadStack;
     private String lastOperation;
     private int tempIndex;
     private int resIndex;
