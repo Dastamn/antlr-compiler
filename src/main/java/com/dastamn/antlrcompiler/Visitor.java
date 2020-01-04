@@ -13,15 +13,11 @@ import java.util.regex.Pattern;
 public class Visitor extends gBaseVisitor<Object> {
 
     private final SymbolTable symbolTable;
-    private final QuadGen quadGen;
-    private final Stack<Boolean> evalStack;
     private final Set<Library> libraries;
     private final Scanner scanner;
 
-    Visitor() {
-        this.symbolTable = new SymbolTable();
-        this.quadGen = new QuadGen();
-        this.evalStack = new Stack<>();
+    Visitor(SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
         this.libraries = new HashSet<>();
         this.scanner = new Scanner(System.in);
     }
@@ -49,7 +45,7 @@ public class Visitor extends gBaseVisitor<Object> {
                     if (id.length() > 10) {
                         Logger.error("Identifier must not exceed 10 characters: '" + id + "'");
                     }
-                    symbolTable.put(id, new STElement(id, type)/*.setType(type).setName(id)*/);
+                    symbolTable.put(id, new STElement(id, type));
                 });
         return null;
     }
@@ -64,14 +60,7 @@ public class Visitor extends gBaseVisitor<Object> {
         String id = ctx.ID().getText();
         STElement stElement = symbolTable.get(ctx.ID().getText());
         if (stElement != null) {
-            Value value = (Value) this.visit(ctx.expression());
-            if (evalStack.isEmpty() || evalStack.peek()) {
-                stElement.setValue(value);
-                if (ctx.expression().getChildCount() == 1) {
-                    quadGen.affect(id, value);
-                }
-            }
-            quadGen.drainQuads(id);
+            stElement.setValue((Value) this.visit(ctx.expression()));
         } else {
             Logger.notDeclared(id);
         }
@@ -88,7 +77,6 @@ public class Visitor extends gBaseVisitor<Object> {
         if (!libraries.contains(Library.LANG)) {
             Logger.missingLibrary(Library.LANG);
         }
-        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.TIMES().getText());
         return ((Value) this.visit(ctx.expression(0))).times((Value) this.visit(ctx.expression(1)));
     }
 
@@ -97,7 +85,6 @@ public class Visitor extends gBaseVisitor<Object> {
         if (!libraries.contains(Library.LANG)) {
             Logger.missingLibrary(Library.LANG);
         }
-        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.DIV().getText());
         return ((Value) this.visit(ctx.expression(0))).div((Value) this.visit(ctx.expression(1)));
     }
 
@@ -106,7 +93,6 @@ public class Visitor extends gBaseVisitor<Object> {
         if (!libraries.contains(Library.LANG)) {
             Logger.missingLibrary(Library.LANG);
         }
-        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.PLUS().getText());
         return ((Value) this.visit(ctx.expression(0))).plus((Value) this.visit(ctx.expression(1)));
     }
 
@@ -115,7 +101,6 @@ public class Visitor extends gBaseVisitor<Object> {
         if (!libraries.contains(Library.LANG)) {
             Logger.missingLibrary(Library.LANG);
         }
-        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.MINUS().getText());
         return ((Value) this.visit(ctx.expression(0))).minus((Value) this.visit(ctx.expression(1)));
     }
 
@@ -124,7 +109,6 @@ public class Visitor extends gBaseVisitor<Object> {
         if (!libraries.contains(Library.LANG)) {
             Logger.missingLibrary(Library.LANG);
         }
-        quadGen.makeQuad(ctx.getChild(1), null, "-");
         return ((Value) this.visit(ctx.expression())).neg();
     }
 
@@ -170,8 +154,6 @@ public class Visitor extends gBaseVisitor<Object> {
         if (left.isString() || right.isString()) {
             Logger.error("Can't evaluate a '" + Type.STRING_SJ + "' type in: " + ctx.getText());
         }
-        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.evalOperand().getText());
-        quadGen.drainQuads(null);
         switch (ctx.evalOperand().getText()) {
             case ">":
                 return left.gt(right);
@@ -192,43 +174,26 @@ public class Visitor extends gBaseVisitor<Object> {
 
     @Override
     public Boolean visitNot(gParser.NotContext ctx) {
-        Boolean res = (Boolean) this.visit(ctx.evaluation());
-        quadGen.makeQuad(null, null, ctx.NOT().getText());
-        return !res;
+        return !(Boolean) this.visit(ctx.evaluation());
     }
 
     @Override
     public Boolean visitAnd(gParser.AndContext ctx) {
-        Boolean left = (Boolean) this.visit(ctx.evaluation(0));
-        Boolean right = (Boolean) this.visit(ctx.evaluation(1));
-        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.AND().getText());
-        quadGen.drainQuads(null);
-        return left && right;
+        return (Boolean) this.visit(ctx.evaluation(0)) && (Boolean) this.visit(ctx.evaluation(1));
     }
 
     @Override
     public Boolean visitOr(gParser.OrContext ctx) {
-        Boolean left = (Boolean) this.visit(ctx.evaluation(0));
-        Boolean right = (Boolean) this.visit(ctx.evaluation(1));
-        quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.OR().getText());
-        quadGen.drainQuads(null);
-        return left || right;
+        return (Boolean) this.visit(ctx.evaluation(0)) || (Boolean) this.visit(ctx.evaluation(1));
     }
 
     @Override
     public Object visitCondition(gParser.ConditionContext ctx) {
-        boolean noExe = !evalStack.isEmpty() && !evalStack.peek();
-        boolean res = (Boolean) this.visit(ctx.ifStatement());
-        evalStack.push(!noExe && res);
-        this.visit(ctx.thenBlock());
-        quadGen.updateLastJump();
-        if (!noExe) {
-            evalStack.push(!evalStack.pop());
-        }
-        if (ctx.elseBlock() != null) {
+        if ((Boolean) this.visit(ctx.ifStatement())) {
+            this.visit(ctx.thenBlock());
+        } else {
             this.visit(ctx.elseBlock());
         }
-        evalStack.pop();
         return null;
     }
 
@@ -238,81 +203,72 @@ public class Visitor extends gBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitThenBlock(gParser.ThenBlockContext ctx) {
-        quadGen.jump();
-        return super.visitThenBlock(ctx);
-    }
-
-    @Override
     public Object visitInput(gParser.InputContext ctx) {
         if (!libraries.contains(Library.IO)) {
             Logger.missingLibrary(Library.IO);
         }
-        if (evalStack.isEmpty() || evalStack.peek()) {
-            String[] formats = ctx.FORMAT().getText()
-                    .substring(1, ctx.FORMAT().getText().length() - 1)
-                    .replaceAll(" ", "")
-                    .split("(?<=\\G.{2})");
-            String[] ids = (String[]) this.visit(ctx.idList());
-            STElement[] stElements = Arrays.stream(ids)
-                    .map(id -> {
-                        STElement stElement = symbolTable.get(id);
-                        if (stElement == null) {
-                            Logger.notDeclared(id);
-                        }
-                        return stElement;
-                    })
-                    .toArray(STElement[]::new);
-            if (ids.length != formats.length) {
-                Logger.error("Count mismatch: " + (ids.length > formats.length ? "more" : "less") +
-                        " identifiers than type formats in input instruction: " + ctx.getText());
-            }
-            for (int i = 0; i < formats.length; i++) {
-                String format = formats[i];
-                switch (format) {
-                    case "%d": {
-                        STElement stElement = stElements[i];
-                        if (stElement.getType() != Type.INT_SJ) {
-                            Logger.formatMismatch("%d", stElement.getType().getFormat(), ids[i], ctx.getText());
-                        }
-                        break;
+        String[] formats = ctx.FORMAT().getText()
+                .substring(1, ctx.FORMAT().getText().length() - 1)
+                .replaceAll(" ", "")
+                .split("(?<=\\G.{2})");
+        String[] ids = (String[]) this.visit(ctx.idList());
+        STElement[] stElements = Arrays.stream(ids)
+                .map(id -> {
+                    STElement stElement = symbolTable.get(id);
+                    if (stElement == null) {
+                        Logger.notDeclared(id);
                     }
-                    case "%f": {
-                        STElement stElement = stElements[i];
-                        if (stElement.getType() != Type.FLOAT_SJ) {
-                            Logger.formatMismatch("%f", stElement.getType().getFormat(), ids[i], ctx.getText());
-                        }
-                        break;
-                    }
-                    case "%s": {
-                        STElement stElement = stElements[i];
-                        if (stElement.getType() != Type.STRING_SJ) {
-                            Logger.formatMismatch("%s", stElement.getType().getFormat(), ids[i], ctx.getText());
-                        }
-                        break;
-                    }
-                }
-            }
-            Arrays.stream(stElements).forEach(stElement -> {
-                try {
-                    switch (stElement.getType()) {
-                        case INT_SJ:
-                            stElement.setValue(scanner.nextInt());
-                            break;
-                        case FLOAT_SJ:
-                            stElement.setValue(scanner.nextFloat());
-                            break;
-                        case STRING_SJ:
-                            stElement.setValue(scanner.next());
-                            break;
-                    }
-                    quadGen.affect(stElement.getName(), stElement.getValue());
-                } catch (InputMismatchException e) {
-                    Logger.error("Type mismatch: expected '" + stElement.getType() +
-                            "' for identifier '" + stElement + "'");
-                }
-            });
+                    return stElement;
+                })
+                .toArray(STElement[]::new);
+        if (ids.length != formats.length) {
+            Logger.error("Count mismatch: " + (ids.length > formats.length ? "more" : "less") +
+                    " identifiers than type formats in input instruction: " + ctx.getText());
         }
+        for (int i = 0; i < formats.length; i++) {
+            String format = formats[i];
+            switch (format) {
+                case "%d": {
+                    STElement stElement = stElements[i];
+                    if (stElement.getType() != Type.INT_SJ) {
+                        Logger.formatMismatch("%d", stElement.getType().getFormat(), ids[i], ctx.getText());
+                    }
+                    break;
+                }
+                case "%f": {
+                    STElement stElement = stElements[i];
+                    if (stElement.getType() != Type.FLOAT_SJ) {
+                        Logger.formatMismatch("%f", stElement.getType().getFormat(), ids[i], ctx.getText());
+                    }
+                    break;
+                }
+                case "%s": {
+                    STElement stElement = stElements[i];
+                    if (stElement.getType() != Type.STRING_SJ) {
+                        Logger.formatMismatch("%s", stElement.getType().getFormat(), ids[i], ctx.getText());
+                    }
+                    break;
+                }
+            }
+        }
+        Arrays.stream(stElements).forEach(stElement -> {
+            try {
+                switch (stElement.getType()) {
+                    case INT_SJ:
+                        stElement.setValue(scanner.nextInt());
+                        break;
+                    case FLOAT_SJ:
+                        stElement.setValue(scanner.nextFloat());
+                        break;
+                    case STRING_SJ:
+                        stElement.setValue(scanner.next());
+                        break;
+                }
+            } catch (InputMismatchException e) {
+                Logger.error("Type mismatch: expected '" + stElement.getType() +
+                        "' for identifier '" + stElement + "'");
+            }
+        });
         return null;
     }
 
@@ -321,9 +277,7 @@ public class Visitor extends gBaseVisitor<Object> {
         if (!libraries.contains(Library.IO)) {
             Logger.missingLibrary(Library.IO);
         }
-        if (evalStack.isEmpty() || evalStack.peek()) {
-            this.visit(ctx.outputArgs());
-        }
+        this.visit(ctx.outputArgs());
         return null;
     }
 
@@ -370,12 +324,5 @@ public class Visitor extends gBaseVisitor<Object> {
     @Override
     public String[] visitOutputIdList(gParser.OutputIdListContext ctx) {
         return (String[]) this.visit(ctx.idList());
-    }
-
-    @Override
-    public Object visitEnd(gParser.EndContext ctx) {
-        symbolTable.print();
-        quadGen.print();
-        return null;
     }
 }

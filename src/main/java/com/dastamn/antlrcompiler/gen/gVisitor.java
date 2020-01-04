@@ -17,12 +17,6 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAxiom(gParser.AxiomContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#end}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEnd(gParser.EndContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link gParser#importLib}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

@@ -18,16 +18,6 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitAxiom(gParser.AxiomContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#end}.
-	 * @param ctx the parse tree
-	 */
-	void enterEnd(gParser.EndContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link gParser#end}.
-	 * @param ctx the parse tree
-	 */
-	void exitEnd(gParser.EndContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link gParser#importLib}.
 	 * @param ctx the parse tree
 	 */

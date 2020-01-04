@@ -8,70 +8,52 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class QuadGen {
 
     private final Quads quads;
-    private final Stack<Quad> quadStack;
-    private String lastOperation;
     private int tempIndex;
-    private int resIndex;
     private String acc;
 
     public QuadGen() {
-        this.quadStack = new Stack<>();
         this.quads = new Quads();
         this.tempIndex = -1;
-        this.resIndex = -1;
     }
 
-    public void makeQuad(ParseTree left, ParseTree right, String operation) {
-        if (operation.equals("!")) {
-            lastOperation = operation;
-            quads.add(new Quad()
-                    .setContainer("res0")
-                    .setLeftOperand("res0")
-                    .setOperator(operation)
-            );
-            return;
-        }
-        boolean isEvalRes = false;
-        String container = "temp";
-        Quad res = new Quad();
-        if (operation.matches("[<=>&|]")) {
-            if (operation.matches("[&|]")) {
-                isEvalRes = true;
-                container = "res";
-                resIndex = -1;
-            }
-            int i = 1;
-            for (Quad elem : quadStack) {
-                if (elem.getContainer().startsWith("res")) {
-                    elem.setContainer(container + i--);
-                }
-            }
-            drainQuads(null);
-            res.setContainer("res" + ++resIndex);
-            lastOperation = operation;
-        } else {
-            res.setContainer(tempIndex == -1 ? "res" : "temp" + tempIndex--);
-        }
+    public void makeQuad(ParseTree left, ParseTree right, String operator) {
         String leftString = parseTreeToString(left);
         String rightString = parseTreeToString(right);
-        if (leftString.startsWith("temp") && rightString.startsWith("temp") && operation.matches("[-/]")) {
+        if (leftString != null && rightString != null &&
+                leftString.startsWith("temp") && rightString.startsWith("temp")) {
             String temp = leftString;
             leftString = rightString;
             rightString = temp;
         }
-        quadStack.push(res
-                .setLeftOperand(isEvalRes ? "res0" : leftString)
-                .setRightOperand(isEvalRes ? "res1" : rightString)
-                .setOperator(operation)
-        );
+        quads.add(new Quad()
+                .setLeftOperand(leftString != null ? leftString : "temp" + tempIndex)
+                .setRightOperand(rightString)
+                .setOperator(operator)
+                .setContainer("temp" + (leftString != null ? ++tempIndex : tempIndex)));
+    }
+
+    public void affect(String id, String value) {
+        if (value == null) {
+            quads.get(quads.size() - 1).setContainer(id);
+            tempIndex = -1;
+        } else {
+            quads.add(new Quad()
+                    .setContainer(id)
+                    .setLeftOperand(value)
+                    .setOperator(":="));
+        }
     }
 
     public void affect(String id, Value value) {
-        quads.add(new Quad().setContainer(id).setLeftOperand(value.toString()).setOperator(":="));
+        quads.add(new Quad()
+                .setContainer(id)
+                .setLeftOperand(value.toString())
+                .setOperator(":="));
     }
 
     public void jump() {
-        if (lastOperation != null) {
+        if (!quads.isEmpty()) {
+            String lastOperation = quads.get(quads.size() - 1).getOperator();
             String type;
             switch (lastOperation) {
                 case "<":
@@ -99,9 +81,8 @@ public class QuadGen {
                     type = "BNZ";
                     break;
             }
-            quads.add(new Quad().setOperator(type).setRightOperand("res0"));
+            quads.add(new Quad().setOperator(type).setRightOperand("temp" + tempIndex));
         }
-
     }
 
     public void updateLastJump() {
@@ -113,19 +94,11 @@ public class QuadGen {
         }
     }
 
-    public void drainQuads(String id) {
-        while (!quadStack.isEmpty()) {
-            Quad quad = quadStack.pop();
-            quads.add(quadStack.isEmpty() && id != null ? quad.setContainer(id) : quad);
-        }
-        tempIndex = -1;
-    }
-
     private String parseTreeToString(ParseTree parseTree) {
         if (parseTree == null) return null;
         String output;
         if (parseTree.getChildCount() > 1) {
-            output = "temp" + (++tempIndex);
+            output = "temp" + (tempIndex > -1 ? tempIndex-- : tempIndex);
         } else {
             output = parseTree.getText();
         }
