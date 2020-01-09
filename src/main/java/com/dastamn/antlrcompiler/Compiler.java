@@ -1,10 +1,12 @@
 package com.dastamn.antlrcompiler;
 
+import com.dastamn.antlrcompiler.entities.SymbolTable;
 import com.dastamn.antlrcompiler.gen.gLexer;
 import com.dastamn.antlrcompiler.gen.gParser;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.IOException;
 
@@ -23,7 +25,10 @@ public class Compiler {
         parser.removeErrorListeners();
         parser.addErrorListener(new ErrorListener());
         ParseTree tree = parser.axiom();
-        Visitor visitor = new Visitor();
+        SymbolTable symbolTable = new SymbolTable();
+        Visitor visitor = new Visitor(symbolTable);
         visitor.visit(tree);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        walker.walk(new Listener(symbolTable), tree);
     }
 }
