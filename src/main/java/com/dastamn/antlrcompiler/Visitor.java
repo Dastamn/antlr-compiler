@@ -192,7 +192,9 @@ public class Visitor extends gBaseVisitor<Object> {
         if ((Boolean) this.visit(ctx.ifStatement())) {
             this.visit(ctx.thenBlock());
         } else {
-            this.visit(ctx.elseBlock());
+            if(ctx.elseBlock() != null) {
+                this.visit(ctx.elseBlock());
+            }
         }
         return null;
     }

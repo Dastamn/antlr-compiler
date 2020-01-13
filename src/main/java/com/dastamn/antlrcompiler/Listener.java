@@ -70,12 +70,24 @@ public class Listener extends gBaseListener {
 
     @Override
     public void enterThenBlock(gParser.ThenBlockContext ctx) {
-        quadGen.jump();
+        quadGen.eval();
     }
 
     @Override
     public void exitThenBlock(gParser.ThenBlockContext ctx) {
-        quadGen.updateLastJump();
+        quadGen.updateJump();
+    }
+
+    @Override
+    public void enterElseBlock(gParser.ElseBlockContext ctx) {
+        quadGen.updateJump();
+        quadGen.jump();
+    }
+
+    @Override
+    public void exitElseBlock(gParser.ElseBlockContext ctx) {
+        quadGen.updateJump();
+        quadGen.purgeJumps();
     }
 
     @Override

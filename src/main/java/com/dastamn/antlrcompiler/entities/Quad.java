@@ -24,6 +24,10 @@ public class Quad {
         return this;
     }
 
+    public String getLeftOperand() {
+        return leftOperand;
+    }
+
     public Quad setLeftOperand(String leftOperand) {
         this.leftOperand = leftOperand;
         return this;

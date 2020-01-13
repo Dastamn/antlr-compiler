@@ -8,11 +8,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class QuadGen {
 
     private final Quads quads;
+    private final Stack<Quad> jumpStack;
+    private Stack<Integer> jumpCount;
     private int tempIndex;
     private String acc;
 
     public QuadGen() {
         this.quads = new Quads();
+        this.jumpStack = new Stack<>();
+        this.jumpCount = new Stack<>();
         this.tempIndex = -1;
     }
 
@@ -52,46 +56,65 @@ public class QuadGen {
     }
 
     public void jump() {
-        if (!quads.isEmpty()) {
-            String lastOperation = quads.get(quads.size() - 1).getOperator();
-            String type;
-            switch (lastOperation) {
-                case "<":
-                    type = "BGE";
-                    break;
-                case "<=":
-                    type = "BG";
-                    break;
-                case ">":
-                    type = "BLE";
-                    break;
-                case ">=":
-                    type = "BL";
-                    break;
-                case "=":
-                    type = "BNE";
-                    break;
-                case "!=":
-                    type = "BE";
-                    break;
-                case "!":
-                    type = "BZ";
-                    break;
-                default:
-                    type = "BNZ";
-                    break;
-            }
-            quads.add(new Quad().setOperator(type).setRightOperand("temp" + tempIndex));
+        Quad quad = new Quad().setOperator("BR");
+        quads.add(quad);
+        jumpStack.push(quad);
+        incrementJumpCount();
+    }
+
+    public void eval() {
+        String lastOperation = quads.get(quads.size() - 1).getOperator();
+        String type;
+        switch (lastOperation) {
+            case "<":
+                type = "BGE";
+                break;
+            case "<=":
+                type = "BG";
+                break;
+            case ">":
+                type = "BLE";
+                break;
+            case ">=":
+                type = "BL";
+                break;
+            case "=":
+                type = "BNE";
+                break;
+            case "!=":
+                type = "BE";
+                break;
+            case "!":
+                type = "BZ";
+                break;
+            default:
+                type = "BNZ";
+                break;
+        }
+        Quad quad = new Quad().setOperator(type).setRightOperand("temp" + tempIndex);
+        quads.add(quad);
+        jumpStack.push(quad);
+        jumpCount.push(1);
+    }
+
+    public void updateJump() {
+        Quad quad = jumpStack.peek();
+        quad.setLeftOperand(String.valueOf(quad.getLeftOperand() != null ?
+                Integer.parseInt(quad.getLeftOperand()) + 1 :
+                quads.size() + 1));
+    }
+
+    public void purgeJumps() {
+        int count = jumpCount.pop();
+        while (count > 0) {
+            jumpStack.pop();
+            count--;
         }
     }
 
-    public void updateLastJump() {
-        for (int i = quads.size() - 1; i >= 0; i--) {
-            if (quads.get(i).isJump()) {
-                quads.get(i).setLeftOperand(String.valueOf(quads.size() + 1));
-                break;
-            }
-        }
+    private void incrementJumpCount() {
+        int count = jumpCount.pop();
+        jumpCount.push(++count);
     }
 
     private String parseTreeToString(ParseTree parseTree) {
