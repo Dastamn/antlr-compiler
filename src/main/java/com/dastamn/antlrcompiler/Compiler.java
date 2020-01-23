@@ -9,6 +9,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.Stack;
 
 public class Compiler {
 
@@ -26,9 +29,12 @@ public class Compiler {
         parser.addErrorListener(new ErrorListener());
         ParseTree tree = parser.axiom();
         SymbolTable symbolTable = new SymbolTable();
-        Visitor visitor = new Visitor(symbolTable);
+        Queue<Boolean> evalQueue = new ArrayDeque<>() {{
+            add(true);
+        }};
+        Visitor visitor = new Visitor(symbolTable, evalQueue);
         visitor.visit(tree);
         ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(new Listener(symbolTable), tree);
+        walker.walk(new Listener(symbolTable, evalQueue), tree);
     }
 }

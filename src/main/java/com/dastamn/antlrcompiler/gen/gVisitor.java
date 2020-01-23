@@ -1,4 +1,4 @@
-// Generated from D:/Développement/IdeaProjects/antlr-compiler/src/main/resources\g.g4 by ANTLR 4.7.2
+// Generated from D:/Dev/IdeaProjects/antlr-compiler/src/main/resources\g.g4 by ANTLR 4.7.2
 package com.dastamn.antlrcompiler.gen;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 

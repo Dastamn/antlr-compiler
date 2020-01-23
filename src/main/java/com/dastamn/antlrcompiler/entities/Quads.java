@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 public class Quads extends ArrayList<Quad> {
 
-    public void print() {
+    public void printTable() {
         String format = "| %-25s | %-10s | %-15s |%n";
         StringBuilder builder = new StringBuilder("Object Code:\n");
         builder.append("+---------------------------+------------+-----------------+\n");
         builder.append("| Quads                     | Acc        | Code            |\n");
         builder.append("+---------------------------+------------+-----------------+\n");
         this.forEach(quad -> {
-            if (quad.hasCode()) {
+            if (quad.hasCode() && !quad.isJump() && !quad.isEval()) {
                 builder.append(String.format(format, quad,
                         quad.getFirstInst()[0], quad.getFirstInst()[1]));
                 if (quad.hasManyInstructions()) {

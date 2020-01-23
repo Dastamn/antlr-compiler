@@ -9,10 +9,20 @@ public class Quad {
     private String leftOperand;
     private String rightOperand;
     private String container;
+    private boolean isEffective;
     private List<String[]> instructions;
 
     public Quad() {
         this.instructions = new ArrayList<>();
+    }
+
+    public Quad(boolean isEffective) {
+        this.isEffective = isEffective;
+        this.instructions = new ArrayList<>();
+    }
+
+    public boolean isEffective() {
+        return isEffective;
     }
 
     public String getOperator() {
@@ -33,6 +43,10 @@ public class Quad {
         return this;
     }
 
+    public String getRightOperand() {
+        return rightOperand;
+    }
+
     public Quad setRightOperand(String rightOperand) {
         this.rightOperand = rightOperand;
         return this;
@@ -47,16 +61,30 @@ public class Quad {
         return this;
     }
 
+    public void swapOperands() {
+        String temp = leftOperand;
+        leftOperand = rightOperand;
+        rightOperand = temp;
+    }
+
     public boolean isAffect() {
         return operator.equals(":=");
     }
 
     public boolean isEval() {
-        return operator.matches("[<=>!&|]");
+        return operator.matches("[<>&|!=]") || operator.equals("!=");
     }
 
     public boolean isJump() {
         return operator.matches("\\w+");
+    }
+
+    public boolean isConditionalJump() {
+        return operator.startsWith("B") && !operator.equals("BR");
+    }
+
+    public boolean isUnconditionalJump() {
+        return operator.equals("BR");
     }
 
     public boolean hasCode() {
@@ -105,19 +133,35 @@ public class Quad {
         if (operator.equals(":=")) {
             instructions.add(new String[]{res, "MOV " + container + " " + leftOperand});
         } else {
-            res = container;
             switch (operator) {
                 case "*":
+                    res = container;
                     instructions.add(new String[]{res, "MULT" + " " + rightOperand});
                     break;
                 case "/":
+                    res = container;
                     instructions.add(new String[]{res, "DIV" + " " + rightOperand});
                     break;
                 case "+":
+                    res = container;
                     instructions.add(new String[]{res, "ADD" + " " + rightOperand});
                     break;
                 case "-":
+                    res = container;
                     instructions.add(new String[]{res, rightOperand == null ? "CHS" : "SUB" + " " + rightOperand});
+                    break;
+                case "=":
+                    instructions.add(new String[]{res, "BNE " + leftOperand + ", " + rightOperand + ", "}); // add jump to else
+                    break;
+                case "<":
+                    instructions.add(new String[]{res, "CMP " + leftOperand + ", " + rightOperand});
+                    instructions.add(new String[]{res, "JGE "});
+                    break;
+                case "<=":
+                    break;
+                case ">":
+                    break;
+                case ">=":
                     break;
                 default:
                     break;
@@ -132,6 +176,6 @@ public class Quad {
         return "(" + operator + ", " +
                 (leftOperand == null ? "" : leftOperand) + ", " +
                 (rightOperand == null ? "" : rightOperand) + ", " +
-                (container == null ? "" : container) + ")";
+                (container == null ? "" : container) + ") " + isEffective;
     }
 }

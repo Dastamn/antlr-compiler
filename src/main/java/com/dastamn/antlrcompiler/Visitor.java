@@ -13,11 +13,13 @@ import java.util.regex.Pattern;
 public class Visitor extends gBaseVisitor<Object> {
 
     private final SymbolTable symbolTable;
+    private final Queue<Boolean> evalQueue;
     private final Set<Library> libraries;
     private final Scanner scanner;
 
-    Visitor(SymbolTable symbolTable) {
+    Visitor(SymbolTable symbolTable, Queue<Boolean> evalQueue) {
         this.symbolTable = symbolTable;
+        this.evalQueue = evalQueue;
         this.libraries = new HashSet<>();
         this.scanner = new Scanner(System.in);
     }
@@ -189,13 +191,17 @@ public class Visitor extends gBaseVisitor<Object> {
 
     @Override
     public Object visitCondition(gParser.ConditionContext ctx) {
-        if ((Boolean) this.visit(ctx.ifStatement())) {
+        boolean eval = (Boolean) this.visit(ctx.ifStatement());
+        evalQueue.offer(eval);
+        if (eval) {
             this.visit(ctx.thenBlock());
         } else {
             if(ctx.elseBlock() != null) {
+                evalQueue.offer(true);
                 this.visit(ctx.elseBlock());
             }
         }
+        evalQueue.offer(true);
         return null;
     }
 
