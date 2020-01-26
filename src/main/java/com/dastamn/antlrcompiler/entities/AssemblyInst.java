@@ -40,8 +40,17 @@ public class AssemblyInst {
         return this;
     }
 
-    public void setLabel(String label) {
+    public String getLabel() {
+        return label;
+    }
+
+    public AssemblyInst setLabel(String label) {
         this.label = label;
+        return this;
+    }
+
+    public boolean hasLabel() {
+        return label != null;
     }
 
     public void setAcc(String acc) {

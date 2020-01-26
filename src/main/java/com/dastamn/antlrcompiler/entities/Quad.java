@@ -10,15 +10,9 @@ public class Quad {
     private String rightOperand;
     private String container;
     private boolean isEffective;
-    private List<String[]> instructions;
-
-    public Quad() {
-        this.instructions = new ArrayList<>();
-    }
 
     public Quad(boolean isEffective) {
         this.isEffective = isEffective;
-        this.instructions = new ArrayList<>();
     }
 
     public boolean isEffective() {
@@ -87,95 +81,11 @@ public class Quad {
         return operator.equals("BR");
     }
 
-    public boolean hasCode() {
-        return !instructions.isEmpty();
-    }
-
-    public boolean hasManyInstructions() {
-        return instructions.size() > 1;
-    }
-
-    public int getInstCount() {
-        return instructions.size();
-    }
-
-    public String[] getFirstInst() {
-        return instructions.get(0);
-    }
-
-    public String[] instAt(int index) {
-        return index >= instructions.size() ? new String[]{null, null} : instructions.get(index);
-    }
-
-    public String getInAcc(String acc) {
-        if (acc == null) {
-            instructions.add(new String[]{leftOperand, "LOAD " + leftOperand});
-            return leftOperand;
-        }
-        if (acc.equals(rightOperand) && !operator.matches("[-/]")) {
-            String temp = leftOperand;
-            leftOperand = rightOperand;
-            rightOperand = temp;
-            return acc;
-        }
-        if (!acc.equals(leftOperand) || operator.matches("[-/]")) {
-            if (!acc.equals(leftOperand)) {
-                instructions.add(new String[]{acc, "STORE " + acc});
-                instructions.add(new String[]{leftOperand, "LOAD " + leftOperand});
-            }
-            return leftOperand;
-        }
-        return acc;
-    }
-
-    public String toObjectCode(String acc) {
-        String res = acc;
-        if (operator.equals(":=")) {
-            instructions.add(new String[]{res, "MOV " + container + " " + leftOperand});
-        } else {
-            switch (operator) {
-                case "*":
-                    res = container;
-                    instructions.add(new String[]{res, "MULT" + " " + rightOperand});
-                    break;
-                case "/":
-                    res = container;
-                    instructions.add(new String[]{res, "DIV" + " " + rightOperand});
-                    break;
-                case "+":
-                    res = container;
-                    instructions.add(new String[]{res, "ADD" + " " + rightOperand});
-                    break;
-                case "-":
-                    res = container;
-                    instructions.add(new String[]{res, rightOperand == null ? "CHS" : "SUB" + " " + rightOperand});
-                    break;
-                case "=":
-                    instructions.add(new String[]{res, "BNE " + leftOperand + ", " + rightOperand + ", "}); // add jump to else
-                    break;
-                case "<":
-                    instructions.add(new String[]{res, "CMP " + leftOperand + ", " + rightOperand});
-                    instructions.add(new String[]{res, "JGE "});
-                    break;
-                case "<=":
-                    break;
-                case ">":
-                    break;
-                case ">=":
-                    break;
-                default:
-                    break;
-            }
-
-        }
-        return res;
-    }
-
     @Override
     public String toString() {
         return "(" + operator + ", " +
                 (leftOperand == null ? "" : leftOperand) + ", " +
                 (rightOperand == null ? "" : rightOperand) + ", " +
-                (container == null ? "" : container) + ") " + isEffective;
+                (container == null ? "" : container) + ") ";
     }
 }

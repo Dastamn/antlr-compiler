@@ -44,6 +44,9 @@ public class Visitor extends gBaseVisitor<Object> {
         String type = ctx.VAR_TYPE().getText();
         Arrays.stream((String[]) this.visit(ctx.idList()))
                 .forEach(id -> {
+                    if (symbolTable.containsKey(id)) {
+                        Logger.error("Identifier '" + id + "' already declared");
+                    }
                     if (id.length() > 10) {
                         Logger.error("Identifier must not exceed 10 characters: '" + id + "'");
                     }
@@ -196,7 +199,7 @@ public class Visitor extends gBaseVisitor<Object> {
         if (eval) {
             this.visit(ctx.thenBlock());
         } else {
-            if(ctx.elseBlock() != null) {
+            if (ctx.elseBlock() != null) {
                 evalQueue.offer(true);
                 this.visit(ctx.elseBlock());
             }

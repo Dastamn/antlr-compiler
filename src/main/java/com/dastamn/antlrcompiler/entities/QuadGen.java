@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuadGen {
 
-    private final Quads quads;
+    private final List<Quad> quads;
     private final Stack<Quad> jumpStack;
     private Stack<Integer> jumpCount;
     private int tempIndex;
@@ -17,7 +17,7 @@ public class QuadGen {
     private List<AssemblyInst> assembly;
 
     public QuadGen() {
-        this.quads = new Quads();
+        this.quads = new ArrayList<>();
         this.jumpStack = new Stack<>();
         this.jumpCount = new Stack<>();
         this.assembly = new ArrayList<>();
@@ -179,7 +179,12 @@ public class QuadGen {
             inst.setInstruction("LOAD " + quad.getLeftOperand());
             if (acc != null && !quad.isEffective()) {
                 if (!acc.startsWith("temp") && !quad.getLeftOperand().equals(acc)) {
-                    assembly.add(new AssemblyInst(acc, "STORE " + acc));
+                    if (inst.hasLabel()) {
+                        assembly.add(new AssemblyInst(acc, "STORE " + acc).setLabel(inst.getLabel()));
+                        inst.setLabel(null);
+                    } else {
+                        assembly.add(new AssemblyInst(acc, "STORE " + acc));
+                    }
                     inst.setAcc(acc);
                 }
             } else {
@@ -200,11 +205,6 @@ public class QuadGen {
     }
 
     public void genAssembly(Quad quad, String indexString, Stack<AssemblyInst> jumpStack, Set<String> labels) {
-        AssemblyInst inst = new AssemblyInst(acc);
-        if (!labels.isEmpty() && labels.contains(indexString)) {
-            inst.setLabel(indexString);
-            labels.remove(indexString);
-        }
         if (!quad.getOperator().matches("[&|]") && !quad.getOperator().equals("!")) {
             AssemblyInst assemblyInst = new AssemblyInst(acc);
             if (!labels.isEmpty() && labels.contains(indexString)) {
@@ -293,111 +293,16 @@ public class QuadGen {
                     break;
                 case "!":
                     jumpStack.get(jumpStack.size() - 1).negateInst();
-                    System.out.println("here: " + jumpStack);
                     break;
                 default:
                     break;
             }
         }
-
-        /*switch (quad.getOperator()) {
-            case ":=":
-                inst.setInstruction("MOV " + quad.getContainer() + " " + quad.getLeftOperand());
-                assembly.add(inst);
-                break;
-            case "*":
-                inst.setInstruction("MULT" + " " + quad.getRightOperand());
-                if(quad.isEffective()) {
-                    inst.setAcc(quad.getContainer());
-                    acc = quad.getContainer();
-                }
-                assembly.add(inst);
-                break;
-            case "/":
-                inst.setInstruction("DIV" + " " + quad.getRightOperand());
-                if(quad.isEffective()) {
-                    inst.setAcc(quad.getContainer());
-                    acc = quad.getContainer();
-                }
-                assembly.add(inst);
-                break;
-            case "+":
-                inst.setInstruction("ADD" + " " + quad.getRightOperand());
-                if(quad.isEffective()) {
-                    inst.setAcc(quad.getContainer());
-                    acc = quad.getContainer();
-                    System.out.println("maj acc: " + quad + ", acc = " + acc);
-                }
-                assembly.add(inst);
-                break;
-            case "-":
-                inst.setInstruction(quad.getRightOperand() == null ? "CHS" : "SUB" + " " + quad.getRightOperand());
-                if(quad.isEffective()) {
-                    inst.setAcc(quad.getContainer());
-                    acc = quad.getContainer();
-                }
-                assembly.add(inst);
-                break;
-            case "=":
-                inst.setInstruction("BNE " + quad.getLeftOperand() + " " + quad.getRightOperand());
-                assembly.add(inst);
-                jumpStack.push(inst);
-                // add jump to else
-                break;
-            case "!=":
-                inst.setInstruction("BE " + quad.getLeftOperand() + " " + quad.getRightOperand());
-                assembly.add(inst);
-                jumpStack.push(inst);
-                break;
-            case "<":
-                inst.setInstruction("CMP " + quad.getLeftOperand() + " " + quad.getRightOperand());
-                assembly.add(inst);
-                inst = new AssemblyInst(acc, "JGE");
-                jumpStack.push(inst);
-                assembly.add(inst);
-                break;
-            case "<=":
-                inst.setInstruction("CMP " + quad.getLeftOperand() + " " + quad.getRightOperand());
-                assembly.add(inst);
-                inst = new AssemblyInst(acc, "JG");
-                jumpStack.push(inst);
-                assembly.add(inst);
-                break;
-            case ">":
-                inst.setInstruction("CMP " + quad.getLeftOperand() + " " + quad.getRightOperand());
-                assembly.add(inst);
-                inst = new AssemblyInst(acc, "JLE");
-                jumpStack.push(inst);
-                assembly.add(inst);
-                break;
-            case ">=":
-                inst.setInstruction("CMP " + quad.getLeftOperand() + " " + quad.getRightOperand());
-                assembly.add(inst);
-                inst = new AssemblyInst(acc, "JL");
-                jumpStack.push(inst);
-                assembly.add(inst);
-                break;
-            case "&":
-                jumpStack.get(jumpStack.size() - 1).setJumpToElse(true);
-                jumpStack.get(jumpStack.size() - 2).setJumpToElse(true);
-                break;
-            case "|":
-                jumpStack.get(jumpStack.size() - 1).setJumpToElse(true);
-                jumpStack.get(jumpStack.size() - 2).negateInst().setJumpToIf(true);
-                break;
-            case "!":
-                jumpStack.get(jumpStack.size() - 1).negateInst();
-                break;
-            default:
-                break;
-        }*/
     }
 
     public void print() {
         generateCode();
         System.out.println(this + "\n");
-        quads.printTable();
-        assembly.forEach(inst -> System.out.println(inst.getAcc() + "\t|\t" + inst.getInstruction()));
     }
 
     @Override
