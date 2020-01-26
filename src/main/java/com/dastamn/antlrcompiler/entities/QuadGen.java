@@ -132,6 +132,15 @@ public class QuadGen {
         return output;
     }
 
+    public void generateCode2() {
+        Stack<AssemblyInst> jumpStack = new Stack<>();
+        Set<String> labels = new HashSet<>();
+        for (int i = 1; i <= quads.size(); i++) {
+            Quad quad = quads.get(i - 1);
+
+        }
+    }
+
     public void generateCode() {
         Stack<AssemblyInst> jumpStack = new Stack<>();
         Set<String> labels = new HashSet<>();

@@ -43,6 +43,11 @@ public class GroupInst extends AssemblyInstruction {
         this.label = label;
     }
 
+    public GroupInst neg() {
+        instructions.forEach(AtomicInst::neg);
+        return this;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(label != null ? "J" + label + ": " : "");

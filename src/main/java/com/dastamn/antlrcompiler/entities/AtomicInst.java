@@ -30,6 +30,32 @@ public class AtomicInst extends AssemblyInstruction {
         this.jump = jump;
     }
 
+    public AssemblyInstruction neg() {
+        switch (instruction.split(" ")[0]) {
+            case "BNE":
+                instruction = instruction.replaceFirst("BNE", "BE");
+                break;
+            case "BE":
+                instruction = instruction.replaceFirst("BE", "BNE");
+                break;
+            case "JGE":
+                instruction = instruction.replaceFirst("JGE", "JL");
+                break;
+            case "JG":
+                instruction = instruction.replaceFirst("JG", "JLE");
+                break;
+            case "JLE":
+                instruction = instruction.replaceFirst("JLE", "JG");
+                break;
+            case "JL":
+                instruction = instruction.replaceFirst("JL", "JGE");
+                break;
+            default:
+                break;
+        }
+        return this;
+    }
+
     @Override
     public String toString() {
         return (label != null ? "J" + label + ": " : "") +
