@@ -154,7 +154,7 @@ public class QuadGen {
             }
             if (quad.isUnconditionalJump()) {
                 int brJump = Integer.parseInt(quad.getLeftOperand());
-                if (brJump < quads.size()) {
+                if (brJump <= quads.size()) {
                     assembly.add(new AssemblyInst(acc, "JUMP").setJumpIndex(quad.getLeftOperand()));
                     labels.add(quad.getLeftOperand());
                 } else {

@@ -7,13 +7,21 @@ class_SJ Test {
     main_SJ {
 
         i := 1;
-        j := 5 + (2 + 6) / 5;
+        j := 5 + 2 + 6;
 
         Si (!(1 < 2) & !(7 != 8)) Alors {
             i := 0 + 1;
         } Sinon {
             j := 2 + 1;
         }
+
+        Si (5>2) Alors {
+        i := 8;
+        } Sinon {
+        i := 9;
+        }
+
+         j:= 2;
     }
 
 }
