@@ -26,8 +26,9 @@ public class AssemblyInst {
         return instruction;
     }
 
-    public void setInstruction(String instruction) {
+    public AssemblyInst setInstruction(String instruction) {
         this.instruction = instruction;
+        return this;
     }
 
     public AssemblyInst setJumpIndex(String jumpIndex) {
@@ -53,8 +54,9 @@ public class AssemblyInst {
         return label != null;
     }
 
-    public void setAcc(String acc) {
+    public AssemblyInst setAcc(String acc) {
         this.acc = acc;
+        return this;
     }
 
     public boolean isJumpToIf() {
