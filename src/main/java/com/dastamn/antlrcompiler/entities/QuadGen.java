@@ -196,9 +196,13 @@ public class QuadGen {
             quad.swapOperands();
         } else if (!acc.equals(quad.getLeftOperand()) || quad.getOperator().matches("[-/]")) {
             if (!acc.equals(quad.getLeftOperand())) {
-                inst.setInstruction("STORE " + acc);
-                assembly.add(inst);
-                assembly.add(new AssemblyInst(quad.getLeftOperand(), "LOAD " + quad.getLeftOperand()));
+                if (!assembly.isEmpty() && !assembly.get(assembly.size() - 1).getInstruction().startsWith("STORE")) {
+                    inst.setInstruction("STORE " + acc);
+                    assembly.add(inst);
+                    assembly.add(new AssemblyInst(quad.getLeftOperand(), "LOAD " + quad.getLeftOperand()));
+                } else {
+                    assembly.add(inst.setInstruction("LOAD " + quad.getLeftOperand()).setAcc(quad.getLeftOperand()));
+                }
             }
             acc = quad.getLeftOperand();
         }
