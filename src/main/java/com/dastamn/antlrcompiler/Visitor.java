@@ -16,12 +16,14 @@ public class Visitor extends gBaseVisitor<Object> {
     private final Queue<Boolean> evalQueue;
     private final Set<Library> libraries;
     private final Scanner scanner;
+    private boolean isEffective;
 
     Visitor(SymbolTable symbolTable, Queue<Boolean> evalQueue) {
         this.symbolTable = symbolTable;
         this.evalQueue = evalQueue;
         this.libraries = new HashSet<>();
         this.scanner = new Scanner(System.in);
+        this.isEffective = evalQueue.isEmpty() || evalQueue.peek();
     }
 
     @Override
@@ -65,7 +67,10 @@ public class Visitor extends gBaseVisitor<Object> {
         String id = ctx.ID().getText();
         STElement stElement = symbolTable.get(ctx.ID().getText());
         if (stElement != null) {
-            stElement.setValue((Value) this.visit(ctx.expression()));
+            Value value = (Value) this.visit(ctx.expression());
+            if (isEffective) {
+                stElement.setValue(value);
+            }
         } else {
             Logger.notDeclared(id);
         }
@@ -195,15 +200,15 @@ public class Visitor extends gBaseVisitor<Object> {
     @Override
     public Object visitCondition(gParser.ConditionContext ctx) {
         boolean eval = (Boolean) this.visit(ctx.ifStatement());
+        isEffective = eval;
         evalQueue.offer(eval);
-        if (eval) {
-            this.visit(ctx.thenBlock());
-        } else {
-            if (ctx.elseBlock() != null) {
-                evalQueue.offer(true);
-                this.visit(ctx.elseBlock());
-            }
+        this.visit(ctx.thenBlock());
+        if (ctx.elseBlock() != null) {
+            isEffective = !isEffective;
+            evalQueue.offer(isEffective);
+            this.visit(ctx.elseBlock());
         }
+        isEffective = true;
         evalQueue.offer(true);
         return null;
     }
@@ -217,6 +222,9 @@ public class Visitor extends gBaseVisitor<Object> {
     public Object visitInput(gParser.InputContext ctx) {
         if (!libraries.contains(Library.IO)) {
             Logger.missingLibrary(Library.IO);
+        }
+        if (isEffective) {
+
         }
         String[] formats = ctx.FORMAT().getText()
                 .substring(1, ctx.FORMAT().getText().length() - 1)
@@ -262,24 +270,26 @@ public class Visitor extends gBaseVisitor<Object> {
                 }
             }
         }
-        Arrays.stream(stElements).forEach(stElement -> {
-            try {
-                switch (stElement.getType()) {
-                    case INT_SJ:
-                        stElement.setValue(scanner.nextInt());
-                        break;
-                    case FLOAT_SJ:
-                        stElement.setValue(scanner.nextFloat());
-                        break;
-                    case STRING_SJ:
-                        stElement.setValue(scanner.next());
-                        break;
+        if (isEffective) {
+            Arrays.stream(stElements).forEach(stElement -> {
+                try {
+                    switch (stElement.getType()) {
+                        case INT_SJ:
+                            stElement.setValue(scanner.nextInt());
+                            break;
+                        case FLOAT_SJ:
+                            stElement.setValue(scanner.nextFloat());
+                            break;
+                        case STRING_SJ:
+                            stElement.setValue(scanner.next());
+                            break;
+                    }
+                } catch (InputMismatchException e) {
+                    Logger.error("Type mismatch: expected '" + stElement.getType() +
+                            "' for identifier '" + stElement + "'");
                 }
-            } catch (InputMismatchException e) {
-                Logger.error("Type mismatch: expected '" + stElement.getType() +
-                        "' for identifier '" + stElement + "'");
-            }
-        });
+            });
+        }
         return null;
     }
 
@@ -328,7 +338,9 @@ public class Visitor extends gBaseVisitor<Object> {
                 str = str.replaceFirst(stElement.getType().getFormat(), String.valueOf(stElement.getValue()));
             }
         }
-        System.out.println("Out_SJ: " + str);
+        if (isEffective) {
+            System.out.println("Out_SJ: " + str);
+        }
         return null;
     }
 
