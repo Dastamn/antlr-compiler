@@ -59,16 +59,6 @@ public class Listener extends gBaseListener {
     }
 
     @Override
-    public void enterEvalParen(gParser.EvalParenContext ctx) {
-//        System.out.println("enter eval paren");
-    }
-
-    @Override
-    public void exitEvalParen(gParser.EvalParenContext ctx) {
-//        System.out.println("exit eval paren");
-    }
-
-    @Override
     public void exitComp(gParser.CompContext ctx) {
         quadGen.makeQuad(ctx.getChild(0), ctx.getChild(2), ctx.evalOperand().getText(),
                 evalQueue.isEmpty() ? true : evalQueue.peek());

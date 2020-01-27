@@ -46,7 +46,7 @@ public class STElement {
 
     public void setValue(Value value) {
         if ((type == Type.STRING_SJ && !value.isString()) || (type != Type.STRING_SJ && value.isString())) {
-            Logger.typeMismatch(value.getType().name(), type.getTypeName(), name);
+            Logger.typeMismatch(value.getType().getTypeName(), type.getTypeName(), name);
         } else {
             this.value = type == Type.INT_SJ ? value.castToInt() : value;
         }

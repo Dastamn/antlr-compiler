@@ -3,8 +3,6 @@ package com.dastamn.antlrcompiler.entities;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuadGen {

@@ -272,6 +272,7 @@ public class Visitor extends gBaseVisitor<Object> {
         }
         if (isEffective) {
             Arrays.stream(stElements).forEach(stElement -> {
+                System.out.print("In_SJ: ");
                 try {
                     switch (stElement.getType()) {
                         case INT_SJ:

@@ -2,26 +2,16 @@ import Small_Java.lang;
 import Small_Java.io;
 
 class_SJ Test {
-	int_SJ  i, j;
-
+	int_SJ  i, j, k;
     main_SJ {
-
-        i := 1;
-        j := 5 + 2 + 6;
-
-        Si (!(1 < 2) & !(7 != 8)) Alors {
+        i := 7 - 4;
+        j := 5 + 2 / 7;
+        k := 5;
+        Si (!(i < j) & !(k != j)) Alors {
             i := 0 + 1;
         } Sinon {
             j := 2 + 1;
         }
-
-        Si (5>2) Alors {
-        i := 8;
-        } Sinon {
-        i := 9;
-        }
-
-         j:= 2;
+        k:= 2;
     }
-
 }
